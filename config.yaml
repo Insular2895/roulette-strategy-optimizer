@@ -1,0 +1,53 @@
+roulette:
+  wheel: european
+  numbers: 37
+
+bankroll:
+  total: 100
+  allowed_units: [1, 2, 3, 5, 10]
+  exact_spend: true
+
+objective:
+  profile: balanced
+  min_coverage: 0.45
+  max_coverage: 0.85
+  big_hit_threshold: 100
+
+search:
+  method: hybrid
+  combos_to_generate: 50000
+  keep_top_n: 10
+
+stake_strategy:
+  max_stake_per_bet: 10
+  allow_repeated_bets: true
+  merge_same_bets: true
+
+monte_carlo:
+  sessions: 10000
+  spins_per_session: 100
+  initial_bankroll: 1000
+
+profiles:
+  safe:
+    coverage_weight: 0.55
+    profit_probability_weight: 0.20
+    avg_win_weight: 0.10
+    big_hit_weight: 0.05
+    risk_weight: 0.10
+
+  balanced:
+    coverage_weight: 0.35
+    profit_probability_weight: 0.20
+    avg_win_weight: 0.20
+    big_hit_weight: 0.15
+    max_profit_weight: 0.10
+    risk_weight: 0.10
+
+  aggressive:
+    coverage_weight: 0.20
+    profit_probability_weight: 0.10
+    avg_win_weight: 0.20
+    big_hit_weight: 0.30
+    max_profit_weight: 0.20
+    risk_weight: 0.10

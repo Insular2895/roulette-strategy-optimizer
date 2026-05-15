@@ -227,7 +227,7 @@ Backend :
 
 ```bash
 pip install -r requirements.txt
-python backend/src/run.py --profile balanced --bankroll 100 --units 1,2,3,5,10
+python3 backend/src/run.py --profile balanced --bankroll 100 --units 1,2,3,5,10
 ```
 
 Frontend :

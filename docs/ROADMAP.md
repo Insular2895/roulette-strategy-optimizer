@@ -30,7 +30,7 @@ Objectif :
 
 Verification :
 
-- `python backend/src/run.py --help`
+- `python3 backend/src/run.py --help`
 - import des modules principaux ;
 - commit et push.
 
