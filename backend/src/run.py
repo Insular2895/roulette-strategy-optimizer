@@ -99,7 +99,11 @@ def build_parser() -> argparse.ArgumentParser:
     """Build the optimizer CLI parser."""
     parser = argparse.ArgumentParser(description="Roulette Strategy Optimizer")
     parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG_PATH, help="Path to config.yaml")
-    parser.add_argument("--profile", choices=("safe", "balanced", "aggressive", "robust_balanced"), help="Optimization profile")
+    parser.add_argument(
+        "--profile",
+        choices=("safe", "balanced", "aggressive", "robust_balanced", "recovery_hits"),
+        help="Optimization profile",
+    )
     parser.add_argument("--bankroll", type=int, help="Total bankroll allocated to strategy generation")
     parser.add_argument("--units", type=parse_units, help="Comma-separated allowed stake units, for example 1,2,3,5,10")
     parser.add_argument("--combos-to-generate", type=int, help="Override search.combos_to_generate")

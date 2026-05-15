@@ -27,11 +27,12 @@ def refine_top_strategies(
     min_stake = int(refinement.get("min_stake_per_bet", 0))
     max_stake = int(refinement.get("max_stake_per_bet", max(10, bankroll)))
     big_hit_threshold = float(config.get("objective", {}).get("big_hit_threshold", 100.0))
+    profile_name = config.get("objective", {}).get("profile", "balanced")
 
     candidates: list[dict[str, Any]] = []
     for strategy in strategies[:top_n]:
         base_bets = strategy["bets"]
-        candidates.append(enrich_ratio(strategy, "original"))
+        candidates.append(enrich_ratio(strategy, "original", profile_name))
         for index in range(variants_per_strategy):
             variant = build_refined_combo(
                 strategy["combo_id"],
@@ -46,7 +47,7 @@ def refine_top_strategies(
                 continue
             evaluation = evaluate_combo(variant, big_hit_threshold=big_hit_threshold)
             if combo_is_within_constraints(evaluation, config):
-                candidates.append(enrich_ratio(evaluation, "refined"))
+                candidates.append(enrich_ratio(evaluation, "refined", profile_name))
 
     candidates.sort(key=lambda item: item["metrics"]["optimization_ratio"], reverse=True)
     refined = []
@@ -138,10 +139,10 @@ def combo_is_within_constraints(evaluation: dict[str, Any], config: dict[str, An
     return min_coverage <= metrics["coverage_probability"] <= max_coverage
 
 
-def enrich_ratio(evaluation: dict[str, Any], source: str) -> dict[str, Any]:
+def enrich_ratio(evaluation: dict[str, Any], source: str, profile_name: str = "balanced") -> dict[str, Any]:
     """Attach optimization ratio metrics."""
     metrics = evaluation["metrics"]
-    optimization_ratio = calculate_optimization_ratio(metrics)
+    optimization_ratio = calculate_optimization_ratio(metrics, profile_name)
     risk = abs(float(metrics.get("min_profit", 0.0))) or 1.0
     risk_reward = (float(metrics.get("avg_profit_if_win", 0.0)) + float(metrics.get("max_profit", 0.0))) / risk
     return {
@@ -155,7 +156,7 @@ def enrich_ratio(evaluation: dict[str, Any], source: str) -> dict[str, Any]:
     }
 
 
-def calculate_optimization_ratio(metrics: dict[str, Any]) -> float:
+def calculate_optimization_ratio(metrics: dict[str, Any], profile_name: str = "balanced") -> float:
     """Calculate a robust reward/risk ratio for stake refinement."""
     profit_probability = float(metrics.get("profit_probability", 0.0))
     big_hit_probability = float(metrics.get("big_hit_probability", 0.0))
@@ -164,9 +165,15 @@ def calculate_optimization_ratio(metrics: dict[str, Any]) -> float:
     volatility = float(metrics.get("volatility", 0.0))
     min_profit = abs(float(metrics.get("min_profit", 0.0)))
     expected_loss = abs(min(float(metrics.get("expected_value", 0.0)), 0.0))
+    loss_buffer_ratio = float(metrics.get("loss_buffer_ratio", 0.0))
+    max_loss_cover = float(metrics.get("max_loss_cover", 0.0))
 
     weighted_reward = profit_probability * avg_profit_if_win
     explosive_reward = big_hit_probability * max_profit
-    reward = weighted_reward + explosive_reward + max_profit * 0.05
-    risk = min_profit + volatility + expected_loss * 5.0
+    if profile_name == "recovery_hits":
+        reward = weighted_reward + explosive_reward + max_profit * 0.12 + loss_buffer_ratio * 18.0 + max_loss_cover * 8.0
+        risk = min_profit + volatility * 0.75 + expected_loss * 4.0
+    else:
+        reward = weighted_reward + explosive_reward + max_profit * 0.05 + loss_buffer_ratio * 5.0 + max_loss_cover * 2.0
+        risk = min_profit + volatility + expected_loss * 5.0
     return reward / (risk or 1.0)

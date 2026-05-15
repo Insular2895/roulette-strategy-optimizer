@@ -3,12 +3,12 @@ roulette:
   numbers: 37
 
 bankroll:
-  total: 50
+  total: 100
   allowed_units: [1, 2, 3, 5, 10]
   exact_spend: true
 
 objective:
-  profile: robust_balanced
+  profile: recovery_hits
   min_coverage: 0.45
   max_coverage: 0.85
   big_hit_threshold: 100
@@ -41,9 +41,9 @@ monte_carlo:
 
 robust_filter:
   enabled: true
-  max_probability_bust: 0.50
-  max_avg_drawdown: 1200
-  max_drawdown_seen: 2800
+  max_probability_bust: 0.68
+  max_avg_drawdown: 1450
+  max_drawdown_seen: 3600
   min_probability_profit: 0.30
 
 profiles:
@@ -78,3 +78,14 @@ profiles:
     max_profit_weight: 0.05
     risk_weight: 0.20
     volatility_weight: 0.20
+
+  recovery_hits:
+    coverage_weight: 0.20
+    profit_probability_weight: 0.18
+    avg_win_weight: 0.22
+    big_hit_weight: 0.18
+    max_profit_weight: 0.18
+    loss_buffer_weight: 0.30
+    max_loss_cover_weight: 0.25
+    risk_weight: 0.08
+    volatility_weight: 0.04

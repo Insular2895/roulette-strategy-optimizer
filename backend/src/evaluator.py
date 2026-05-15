@@ -66,25 +66,35 @@ def calculate_metrics(outcomes: list[dict[str, Any]], total_staked: int) -> dict
     net_profits = [float(outcome["net_profit"]) for outcome in outcomes]
     covered = [outcome for outcome in outcomes if outcome["is_covered"]]
     profitable = [outcome for outcome in outcomes if outcome["is_profitable"]]
+    losing = [outcome for outcome in outcomes if not outcome["is_profitable"]]
     big_hits = [outcome for outcome in outcomes if outcome["is_big_hit"]]
     avg_profit_if_win = mean(outcome["net_profit"] for outcome in profitable) if profitable else 0.0
+    avg_loss_if_loss = abs(mean(outcome["net_profit"] for outcome in losing)) if losing else 0.0
     expected_value = mean(net_profits)
     variance = mean((profit - expected_value) ** 2 for profit in net_profits)
+    max_profit = max(net_profits) if net_profits else 0.0
+    min_profit = min(net_profits) if net_profits else 0.0
+    loss_buffer_ratio = avg_profit_if_win / avg_loss_if_loss if avg_loss_if_loss else 0.0
+    max_loss_cover = max_profit / total_staked if total_staked else 0.0
 
     return {
         "total_staked": total_staked,
         "coverage_probability": len(covered) / len(outcomes),
         "hit_probability": len(covered) / len(outcomes),
         "profit_probability": len(profitable) / len(outcomes),
+        "loss_probability": len(losing) / len(outcomes),
         "avg_profit_if_win": avg_profit_if_win,
-        "max_profit": max(net_profits) if net_profits else 0.0,
-        "min_profit": min(net_profits) if net_profits else 0.0,
+        "avg_loss_if_loss": avg_loss_if_loss,
+        "max_profit": max_profit,
+        "min_profit": min_profit,
         "expected_value": expected_value,
         "big_hit_probability": len(big_hits) / len(outcomes),
         "variance": variance,
         "volatility": variance**0.5,
         "median_profit": median(net_profits) if net_profits else 0.0,
-        "theoretical_drawdown": abs(min(net_profits)) if net_profits else 0.0,
+        "theoretical_drawdown": abs(min_profit) if net_profits else 0.0,
+        "loss_buffer_ratio": loss_buffer_ratio,
+        "max_loss_cover": max_loss_cover,
     }
 
 

@@ -24,6 +24,8 @@ BEST_COMBOS_COLUMNS = [
     "expected_value",
     "big_hit_probability",
     "variance",
+    "loss_buffer_ratio",
+    "max_loss_cover",
     "optimization_ratio",
     "refinement_source",
     "robust_score",
@@ -112,6 +114,8 @@ def export_best_combos(results: list[dict[str, Any]], path: Path) -> None:
                     "expected_value": metrics["expected_value"],
                     "big_hit_probability": metrics["big_hit_probability"],
                     "variance": metrics["variance"],
+                    "loss_buffer_ratio": metrics.get("loss_buffer_ratio"),
+                    "max_loss_cover": metrics.get("max_loss_cover"),
                     "optimization_ratio": metrics.get("optimization_ratio"),
                     "refinement_source": result.get("refinement_source"),
                     "robust_score": result.get("monte_carlo", {}).get("robust_score"),
@@ -333,6 +337,8 @@ def export_roulette_board_html(result: dict[str, Any] | None, path: Path) -> Non
       {metric_card('Coverage', percent(metrics['coverage_probability']))}
       {metric_card('Profit probability', percent(metrics['profit_probability']))}
       {metric_card('Max profit', metrics['max_profit'])}
+      {metric_card('Loss buffer', round(float(metrics.get('loss_buffer_ratio', 0.0)), 2))}
+      {metric_card('Losses covered', round(float(metrics.get('max_loss_cover', 0.0)), 2))}
       {monte_carlo_cards}
     </div>
 

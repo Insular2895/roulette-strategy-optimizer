@@ -103,12 +103,12 @@ roulette:
   numbers: 37
 
 bankroll:
-  total: 50
+  total: 100
   allowed_units: [1, 2, 3, 5, 10]
   exact_spend: true
 
 objective:
-  profile: robust_balanced
+  profile: recovery_hits
   min_coverage: 0.45
   max_coverage: 0.85
   big_hit_threshold: 100
@@ -141,9 +141,9 @@ monte_carlo:
 
 robust_filter:
   enabled: true
-  max_probability_bust: 0.50
-  max_avg_drawdown: 1200
-  max_drawdown_seen: 2800
+  max_probability_bust: 0.68
+  max_avg_drawdown: 1450
+  max_drawdown_seen: 3600
   min_probability_profit: 0.30
 ```
 
@@ -214,6 +214,14 @@ Le raffinement garde les structures de paris les plus prometteuses, puis genere 
 
 Le but est de trouver un meilleur compromis entre gros hits, frequence de profit et risque de destruction bankroll, sans pretendre changer l'esperance mathematique de la roulette.
 
+Le profil `recovery_hits` ajoute une contrainte pratique : les hits doivent couvrir plusieurs pertes. Il favorise donc :
+
+- `loss_buffer_ratio` : gain moyen positif / perte moyenne ;
+- `max_loss_cover` : nombre de mises completes couvertes par le meilleur hit ;
+- les superpositions capables de rembourser une serie courte de pertes.
+
+Ce profil ne rend pas la roulette gagnante sur le long terme mathematique, mais il cherche une distribution plus adaptee aux sessions ou quelques hits doivent absorber les pertes.
+
 ## Monte Carlo
 
 Les meilleures strategies sont validees par simulations aleatoires.
@@ -246,6 +254,7 @@ Le `robust_score` favorise :
 - la frequence des gros hits ;
 - la couverture theorique ;
 - le ratio theorique optimise.
+- la capacite d'un hit a rembourser plusieurs pertes.
 
 Il penalise :
 
@@ -298,14 +307,15 @@ Backend :
 ```bash
 pip install -r requirements.txt
 python3 backend/src/run.py --profile robust_balanced --bankroll 50 --units 1,2,3,5,10
+python3 backend/src/run.py --profile recovery_hits --bankroll 100 --units 1,2,3,5,10
 ```
 
 Run rapide pour generer des fichiers consultables sans serveur web :
 
 ```bash
 python3 backend/src/run.py \
-  --profile robust_balanced \
-  --bankroll 50 \
+  --profile recovery_hits \
+  --bankroll 100 \
   --combos-to-generate 200 \
   --keep-top-n 5 \
   --monte-carlo-sessions 200 \

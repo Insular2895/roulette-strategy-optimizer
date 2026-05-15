@@ -11,6 +11,8 @@ PROFILE_METRIC_MAP = {
     "avg_win_weight": "avg_profit_if_win",
     "big_hit_weight": "big_hit_probability",
     "max_profit_weight": "max_profit",
+    "loss_buffer_weight": "loss_buffer_ratio",
+    "max_loss_cover_weight": "max_loss_cover",
 }
 
 MINIMIZE_METRIC_MAP = {

@@ -106,6 +106,8 @@ def calculate_robust_score(result: dict[str, Any], metrics: dict[str, Any]) -> f
     hit_component = float(result.get("big_hit_frequency", 0.0)) * 0.9
     coverage_component = float(metrics.get("coverage_probability", 0.0)) * 0.8
     theory_component = float(metrics.get("optimization_ratio", metrics.get("risk_reward_score", 0.0))) * 0.15
+    recovery_component = float(metrics.get("loss_buffer_ratio", 0.0)) * 0.22 + float(metrics.get("max_loss_cover", 0.0)) * 0.12
+    hit_size_component = float(result.get("biggest_hit_seen", 0.0)) / (initial_bankroll or 1.0) * 0.35
 
     bust_penalty = float(result.get("probability_bust", 0.0)) * 4.0
     drawdown_penalty = float(result.get("avg_max_drawdown", 0.0)) / (initial_bankroll or 1.0) * 1.35
@@ -116,8 +118,10 @@ def calculate_robust_score(result: dict[str, Any], metrics: dict[str, Any]) -> f
         + median_retention
         + profit_component
         + hit_component
+        + hit_size_component
         + coverage_component
         + theory_component
+        + recovery_component
         - bust_penalty
         - drawdown_penalty
         - worst_drawdown_penalty

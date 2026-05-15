@@ -69,6 +69,37 @@ class OptimizerTest(unittest.TestCase):
         self.assertEqual(results[0]["profile"], "robust_balanced")
         self.assertIn("volatility", results[0]["score_components"])
 
+    def test_recovery_hits_profile_scores_loss_buffer_metrics(self):
+        config = {
+            "bankroll": {"total": 20, "allowed_units": [1, 2, 5], "exact_spend": True},
+            "objective": {"profile": "recovery_hits", "min_coverage": 0.0, "max_coverage": 1.0, "big_hit_threshold": 30},
+            "search": {"method": "hybrid", "combos_to_generate": 16, "keep_top_n": 4},
+            "pareto": {"enabled": True, "candidate_pool_size": 8},
+            "stake_strategy": {"max_stake_per_bet": 5, "merge_same_bets": True},
+            "refinement": {"enabled": False},
+            "profiles": {
+                "recovery_hits": {
+                    "coverage_weight": 0.20,
+                    "profit_probability_weight": 0.18,
+                    "avg_win_weight": 0.22,
+                    "big_hit_weight": 0.18,
+                    "max_profit_weight": 0.18,
+                    "loss_buffer_weight": 0.30,
+                    "max_loss_cover_weight": 0.25,
+                    "risk_weight": 0.08,
+                    "volatility_weight": 0.04,
+                }
+            },
+        }
+
+        results = optimize(config, seed=8)
+
+        self.assertTrue(results)
+        self.assertEqual(results[0]["profile"], "recovery_hits")
+        self.assertIn("loss_buffer_ratio", results[0]["metrics"])
+        self.assertIn("max_loss_cover", results[0]["metrics"])
+        self.assertIn("loss_buffer_ratio", results[0]["score_components"])
+
 
 if __name__ == "__main__":
     unittest.main()
