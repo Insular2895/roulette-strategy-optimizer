@@ -1,0 +1,23 @@
+{
+  "combo_id": "sample_balanced_stack",
+  "rank": 1,
+  "profile": "balanced",
+  "score": 0.72,
+  "bets": [
+    { "bet_id": "straight_17", "type": "straight", "numbers": [17], "stake": 3, "payout": 35 },
+    { "bet_id": "split_17_20", "type": "split", "numbers": [17, 20], "stake": 2, "payout": 17 },
+    { "bet_id": "corner_16_17_19_20", "type": "corner", "numbers": [16, 17, 19, 20], "stake": 5, "payout": 8 },
+    { "bet_id": "dozen_2", "type": "dozen", "numbers": [13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24], "stake": 10, "payout": 2 }
+  ],
+  "metrics": {
+    "total_staked": 20,
+    "coverage_probability": 0.3243,
+    "profit_probability": 0.1081,
+    "avg_profit_if_win": 66.5,
+    "max_profit": 199,
+    "min_profit": -20,
+    "expected_value": -0.5405,
+    "big_hit_probability": 0.027,
+    "variance": 1782.3
+  }
+}
