@@ -31,7 +31,7 @@ docs/assets/readme-banner.png
 Le README pointe actuellement vers :
 
 ```text
-docs/assets/readme-banner-placeholder.svg
+docs/assets/readme-banner-v2.svg
 ```
 
 Ce fichier pourra etre remplace par une vraie image quand la direction visuelle sera validee.
