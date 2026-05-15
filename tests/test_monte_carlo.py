@@ -2,7 +2,7 @@ import csv
 import tempfile
 import unittest
 
-from backend.src.monte_carlo import run_monte_carlo
+from backend.src.monte_carlo import rerank_by_monte_carlo, run_monte_carlo
 from backend.src.optimizer import optimize
 from backend.src.visual_export import MONTE_CARLO_PATHS_COLUMNS, MONTE_CARLO_RESULTS_COLUMNS, export_monte_carlo
 
@@ -63,6 +63,17 @@ class MonteCarloTest(unittest.TestCase):
                 reader = csv.DictReader(handle)
                 self.assertEqual(reader.fieldnames, MONTE_CARLO_PATHS_COLUMNS)
                 self.assertEqual(len(list(reader)), 2 * 3 * 4)
+
+    def test_monte_carlo_reranks_with_robust_score(self):
+        strategies = optimize(make_config(), seed=3)
+        simulation = run_monte_carlo(strategies, sessions=5, spins_per_session=8, initial_bankroll=60, seed=10)
+
+        reranked = rerank_by_monte_carlo(strategies, simulation)
+
+        self.assertEqual([strategy["rank"] for strategy in reranked], [1, 2])
+        self.assertIn("monte_carlo", reranked[0])
+        self.assertIn("robust_score", reranked[0]["monte_carlo"])
+        self.assertGreaterEqual(reranked[0]["monte_carlo"]["robust_score"], reranked[-1]["monte_carlo"]["robust_score"])
 
 
 if __name__ == "__main__":

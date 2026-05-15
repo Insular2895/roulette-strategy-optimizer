@@ -9,11 +9,11 @@ from typing import Any
 
 if __package__ in {None, ""}:
     sys.path.append(str(Path(__file__).resolve().parents[2]))
-    from backend.src.monte_carlo import run_monte_carlo
+    from backend.src.monte_carlo import rerank_by_monte_carlo, run_monte_carlo
     from backend.src.optimizer import optimize
     from backend.src.visual_export import export_monte_carlo, export_monte_carlo_html, export_outputs, export_report_index
 else:
-    from .monte_carlo import run_monte_carlo
+    from .monte_carlo import rerank_by_monte_carlo, run_monte_carlo
     from .optimizer import optimize
     from .visual_export import export_monte_carlo, export_monte_carlo_html, export_outputs, export_report_index
 
@@ -166,8 +166,11 @@ def main() -> int:
             initial_bankroll=float(monte_carlo_config.get("initial_bankroll", 1000)),
             seed=args.seed,
         )
+        strategies = rerank_by_monte_carlo(strategies, simulation)
+        data_paths = export_outputs(strategies, args.output_dir)
         monte_carlo_paths = export_monte_carlo(simulation, args.output_dir)
         html_paths = export_monte_carlo_html(simulation, args.output_dir)
+        print("Final ranking: Monte Carlo robust score")
         print(f"Monte Carlo exports: {', '.join(str(path) for path in monte_carlo_paths.values())}")
         print(f"HTML exports: {', '.join(str(path) for path in html_paths.values())}")
 

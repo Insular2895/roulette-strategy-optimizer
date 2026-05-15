@@ -26,6 +26,10 @@ BEST_COMBOS_COLUMNS = [
     "variance",
     "optimization_ratio",
     "refinement_source",
+    "robust_score",
+    "mc_probability_profit",
+    "mc_probability_bust",
+    "mc_avg_max_drawdown",
 ]
 
 NUMBER_OUTCOMES_COLUMNS = [
@@ -106,6 +110,10 @@ def export_best_combos(results: list[dict[str, Any]], path: Path) -> None:
                     "variance": metrics["variance"],
                     "optimization_ratio": metrics.get("optimization_ratio"),
                     "refinement_source": result.get("refinement_source"),
+                    "robust_score": result.get("monte_carlo", {}).get("robust_score"),
+                    "mc_probability_profit": result.get("monte_carlo", {}).get("probability_profit"),
+                    "mc_probability_bust": result.get("monte_carlo", {}).get("probability_bust"),
+                    "mc_avg_max_drawdown": result.get("monte_carlo", {}).get("avg_max_drawdown"),
                 }
             )
 

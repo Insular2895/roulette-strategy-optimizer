@@ -225,6 +225,21 @@ Le Monte Carlo mesure :
 - volatilite reelle ;
 - comportement long run.
 
+Quand Monte Carlo est active, le classement final est reranke avec `robust_score`. La strategie affichee dans `outputs/roulette_board.html` correspond donc a la meilleure strategie apres validation Monte Carlo du batch courant.
+
+Le `robust_score` favorise :
+
+- la retention moyenne de bankroll ;
+- la probabilite de finir positif ;
+- la frequence des gros hits ;
+- le ratio theorique optimise.
+
+Il penalise :
+
+- la probabilite de ruine ;
+- le drawdown moyen ;
+- le pire drawdown observe.
+
 ## Outputs
 
 | Fichier | Role |

@@ -27,6 +27,54 @@ def run_monte_carlo(
     return {"results": aggregate_results, "paths": all_paths}
 
 
+def rerank_by_monte_carlo(
+    strategies: list[dict[str, Any]],
+    simulation: dict[str, list[dict[str, Any]]],
+) -> list[dict[str, Any]]:
+    """Return strategies reranked by robust Monte Carlo behavior."""
+    result_by_combo = {result["combo_id"]: result for result in simulation["results"]}
+    enriched: list[dict[str, Any]] = []
+
+    for strategy in strategies:
+        result = result_by_combo[strategy["combo_id"]]
+        robust_score = calculate_robust_score(result, strategy["metrics"])
+        monte_carlo_metrics = {**result, "robust_score": robust_score}
+        enriched.append(
+            {
+                **strategy,
+                "monte_carlo": monte_carlo_metrics,
+                "score": robust_score,
+            }
+        )
+
+    enriched.sort(key=lambda strategy: strategy["monte_carlo"]["robust_score"], reverse=True)
+    return [
+        {
+            **strategy,
+            "rank": rank,
+        }
+        for rank, strategy in enumerate(enriched, start=1)
+    ]
+
+
+def calculate_robust_score(result: dict[str, Any], metrics: dict[str, Any]) -> float:
+    """Score a strategy by Monte Carlo resilience and theoretical upside."""
+    final_bankroll_avg = float(result.get("final_bankroll_avg", 0.0))
+    sessions = float(result.get("sessions", 1.0)) or 1.0
+    spins = float(result.get("spins_per_session", 1.0)) or 1.0
+    expected_start = final_bankroll_avg - float(metrics.get("expected_value", 0.0)) * spins
+
+    bankroll_retention = final_bankroll_avg / (expected_start or 1.0)
+    profit_component = float(result.get("probability_profit", 0.0)) * 2.0
+    hit_component = float(result.get("big_hit_frequency", 0.0)) * 1.2
+    bust_penalty = float(result.get("probability_bust", 0.0)) * 2.5
+    drawdown_penalty = float(result.get("avg_max_drawdown", 0.0)) / (expected_start or 1.0)
+    worst_drawdown_penalty = float(result.get("max_drawdown_seen", 0.0)) / ((expected_start or 1.0) * max(sessions**0.5, 1.0))
+    theory_component = float(metrics.get("optimization_ratio", metrics.get("risk_reward_score", 0.0))) * 0.25
+
+    return bankroll_retention + profit_component + hit_component + theory_component - bust_penalty - drawdown_penalty - worst_drawdown_penalty
+
+
 def simulate_strategy(
     strategy: dict[str, Any],
     sessions: int,
