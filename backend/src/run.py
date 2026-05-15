@@ -11,11 +11,11 @@ if __package__ in {None, ""}:
     sys.path.append(str(Path(__file__).resolve().parents[2]))
     from backend.src.monte_carlo import run_monte_carlo
     from backend.src.optimizer import optimize
-    from backend.src.visual_export import export_monte_carlo, export_monte_carlo_html, export_outputs
+    from backend.src.visual_export import export_monte_carlo, export_monte_carlo_html, export_outputs, export_report_index
 else:
     from .monte_carlo import run_monte_carlo
     from .optimizer import optimize
-    from .visual_export import export_monte_carlo, export_monte_carlo_html, export_outputs
+    from .visual_export import export_monte_carlo, export_monte_carlo_html, export_outputs, export_report_index
 
 
 DEFAULT_CONFIG_PATH = Path(__file__).resolve().parents[2] / "config.yaml"
@@ -149,6 +149,8 @@ def main() -> int:
     data_paths = export_outputs(strategies, args.output_dir)
     print(f"Theoretical exports: {', '.join(str(path) for path in data_paths.values())}")
 
+    monte_carlo_paths = {}
+    html_paths = {}
     if not args.skip_monte_carlo:
         monte_carlo_config = config.get("monte_carlo", {})
         simulation = run_monte_carlo(
@@ -163,6 +165,8 @@ def main() -> int:
         print(f"Monte Carlo exports: {', '.join(str(path) for path in monte_carlo_paths.values())}")
         print(f"HTML exports: {', '.join(str(path) for path in html_paths.values())}")
 
+    report_path = export_report_index(args.output_dir, data_paths, monte_carlo_paths, html_paths)
+    print(f"Report index: {report_path}")
     return 0
 
 

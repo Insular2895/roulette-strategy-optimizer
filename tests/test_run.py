@@ -36,8 +36,10 @@ class RunCliTest(unittest.TestCase):
             output_path = Path(temp_dir)
             self.assertTrue((output_path / "best_combos.csv").exists())
             self.assertTrue((output_path / "best_combo_detail.json").exists())
+            self.assertTrue((output_path / "roulette_board.html").exists())
             self.assertTrue((output_path / "monte_carlo_results.csv").exists())
             self.assertTrue((output_path / "monte_carlo_paths.html").exists())
+            self.assertTrue((output_path / "report.html").exists())
 
 
 if __name__ == "__main__":

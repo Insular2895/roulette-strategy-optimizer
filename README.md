@@ -199,6 +199,8 @@ Le Monte Carlo mesure :
 | `outputs/monte_carlo_paths.html` | Courbes Monte Carlo individuelles et moyenne. |
 | `outputs/monte_carlo_summary.html` | Distribution des bankrolls finales et resume global. |
 | `outputs/monte_carlo_comparison.html` | Comparaison des meilleures strategies. |
+| `outputs/roulette_board.html` | Visualisation fichier du tapis roulette et des gains par numero. |
+| `outputs/report.html` | Index local reliant toutes les donnees et visualisations generees. |
 
 ## Frontend
 
@@ -229,6 +231,20 @@ Backend :
 pip install -r requirements.txt
 python3 backend/src/run.py --profile balanced --bankroll 100 --units 1,2,3,5,10
 ```
+
+Run rapide pour generer des fichiers consultables sans serveur web :
+
+```bash
+python3 backend/src/run.py \
+  --combos-to-generate 200 \
+  --keep-top-n 5 \
+  --monte-carlo-sessions 200 \
+  --spins-per-session 100 \
+  --initial-bankroll 1000 \
+  --output-dir outputs
+```
+
+Ouvrir ensuite `outputs/report.html` ou directement `outputs/roulette_board.html`.
 
 Frontend :
 

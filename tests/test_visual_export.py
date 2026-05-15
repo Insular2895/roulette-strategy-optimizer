@@ -34,6 +34,7 @@ class VisualExportTest(unittest.TestCase):
             self.assertTrue(paths["best_combos"].exists())
             self.assertTrue(paths["best_combo_detail"].exists())
             self.assertTrue(paths["number_outcomes"].exists())
+            self.assertTrue(paths["roulette_board_html"].exists())
 
             with paths["best_combos"].open("r", encoding="utf-8", newline="") as handle:
                 reader = csv.DictReader(handle)
@@ -48,6 +49,10 @@ class VisualExportTest(unittest.TestCase):
                 reader = csv.DictReader(handle)
                 self.assertEqual(reader.fieldnames, NUMBER_OUTCOMES_COLUMNS)
                 self.assertEqual(len(list(reader)), 3 * 37)
+
+            board_html = paths["roulette_board_html"].read_text(encoding="utf-8")
+            self.assertIn("Roulette", board_html)
+            self.assertIn("Max profit", board_html)
 
 
 if __name__ == "__main__":

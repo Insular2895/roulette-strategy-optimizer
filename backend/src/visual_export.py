@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import csv
+import html
 import json
 from pathlib import Path
 from statistics import mean, median
@@ -61,7 +62,7 @@ MONTE_CARLO_PATHS_COLUMNS = [
 
 
 def export_outputs(results: list[dict[str, Any]], output_dir: str | Path = "outputs") -> dict[str, Path]:
-    """Export best combos, best combo detail and number outcomes."""
+    """Export best combos, best combo detail, number outcomes and board HTML."""
     output_path = Path(output_dir)
     output_path.mkdir(parents=True, exist_ok=True)
 
@@ -69,11 +70,13 @@ def export_outputs(results: list[dict[str, Any]], output_dir: str | Path = "outp
         "best_combos": output_path / "best_combos.csv",
         "best_combo_detail": output_path / "best_combo_detail.json",
         "number_outcomes": output_path / "number_outcomes.csv",
+        "roulette_board_html": output_path / "roulette_board.html",
     }
 
     export_best_combos(results, paths["best_combos"])
     export_best_combo_detail(results[0] if results else None, paths["best_combo_detail"])
     export_number_outcomes(results, paths["number_outcomes"])
+    export_roulette_board_html(results[0] if results else None, paths["roulette_board_html"])
     return paths
 
 
@@ -171,6 +174,170 @@ def export_monte_carlo_html(
     paths["monte_carlo_summary_html"].write_text(build_summary_html(simulation["results"], simulation["paths"]), encoding="utf-8")
     paths["monte_carlo_comparison_html"].write_text(build_comparison_html(simulation["results"]), encoding="utf-8")
     return paths
+
+
+def export_report_index(
+    output_dir: str | Path = "outputs",
+    data_paths: dict[str, Path] | None = None,
+    monte_carlo_paths: dict[str, Path] | None = None,
+    html_paths: dict[str, Path] | None = None,
+) -> Path:
+    """Export a local file index linking every generated artifact."""
+    output_path = Path(output_dir)
+    output_path.mkdir(parents=True, exist_ok=True)
+    report_path = output_path / "report.html"
+    sections = [
+        ("Strategy data", data_paths or {}),
+        ("Monte Carlo data", monte_carlo_paths or {}),
+        ("Visualizations", html_paths or {}),
+    ]
+    cards = []
+    for title, paths in sections:
+        links = "\n".join(
+            f'<li><a href="{html.escape(path.name)}">{html.escape(path.name)}</a><span>{html.escape(key)}</span></li>'
+            for key, path in paths.items()
+        )
+        cards.append(f"<section><h2>{html.escape(title)}</h2><ul>{links}</ul></section>")
+
+    report_path.write_text(
+        f"""<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Roulette Strategy Optimizer Report</title>
+  <style>
+    body {{ margin: 0; background: #101214; color: #f8fafc; font-family: Arial, sans-serif; }}
+    main {{ width: min(1120px, calc(100% - 48px)); margin: 0 auto; padding: 40px 0; }}
+    h1 {{ font-size: 42px; margin: 0 0 10px; }}
+    p {{ color: #cbd5e1; margin: 0 0 28px; }}
+    section {{ border: 1px solid #27313b; border-radius: 8px; padding: 18px; margin: 16px 0; background: #151a1f; }}
+    h2 {{ margin: 0 0 14px; font-size: 20px; }}
+    ul {{ list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }}
+    li {{ display: flex; justify-content: space-between; gap: 12px; border-top: 1px solid #27313b; padding-top: 10px; }}
+    a {{ color: #7dd3fc; font-weight: 700; text-decoration: none; }}
+    span {{ color: #94a3b8; }}
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Roulette Strategy Optimizer Report</h1>
+    <p>Open these generated files directly from this folder. No dev server is required.</p>
+    {''.join(cards)}
+  </main>
+</body>
+</html>
+""",
+        encoding="utf-8",
+    )
+    return report_path
+
+
+def export_roulette_board_html(result: dict[str, Any] | None, path: Path) -> None:
+    """Export an HTML roulette board heatmap for the best strategy."""
+    if not result:
+        path.write_text("<!doctype html><html><body>No strategy generated.</body></html>", encoding="utf-8")
+        return
+
+    outcome_by_number = {outcome["number"]: outcome for outcome in result["outcomes"]}
+    rows = [[3 + index * 3, 2 + index * 3, 1 + index * 3] for index in range(12)]
+    number_cells = "\n".join(
+        render_number_cell(number, outcome_by_number[number])
+        for row in rows
+        for number in row
+    )
+    zero_cell = render_number_cell(0, outcome_by_number[0], extra_class="zero")
+    bet_rows = "\n".join(
+        f"<tr><td>{html.escape(bet['bet_id'])}</td><td>{html.escape(bet['type'])}</td><td>{bet['stake']}</td><td>{html.escape('-'.join(str(number) for number in bet['numbers']))}</td></tr>"
+        for bet in result["bets"]
+    )
+    metrics = result["metrics"]
+
+    path.write_text(
+        f"""<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Roulette Board - {html.escape(result['combo_id'])}</title>
+  <style>
+    body {{ margin: 0; background: #101214; color: #f8fafc; font-family: Arial, sans-serif; }}
+    main {{ width: min(1280px, calc(100% - 40px)); margin: 0 auto; padding: 30px 0; }}
+    h1 {{ margin: 0 0 8px; font-size: 34px; }}
+    .summary {{ display: grid; grid-template-columns: repeat(5, minmax(120px, 1fr)); gap: 10px; margin: 20px 0; }}
+    .metric {{ background: #151a1f; border: 1px solid #27313b; border-radius: 8px; padding: 14px; }}
+    .metric span {{ color: #94a3b8; display: block; font-size: 12px; }}
+    .metric strong {{ font-size: 22px; display: block; margin-top: 8px; }}
+    .board {{ display: grid; grid-template-columns: 80px 1fr; border: 1px solid #d1d5db; background: #0e402b; }}
+    .grid {{ display: grid; grid-template-columns: repeat(12, 1fr); }}
+    .cell {{ min-height: 92px; border: 1px solid rgba(255,255,255,0.5); display: grid; align-content: center; justify-items: center; gap: 8px; color: white; }}
+    .zero {{ min-height: 276px; }}
+    .red {{ background: #8f1d1d; }}
+    .black {{ background: #111111; }}
+    .green {{ background: #0f5132; }}
+    .loss {{ box-shadow: inset 0 0 0 999px rgba(148, 163, 184, 0.09); }}
+    .profit {{ box-shadow: inset 0 0 0 999px rgba(34, 197, 94, 0.30); }}
+    .hit {{ box-shadow: inset 0 0 0 999px rgba(242, 201, 76, 0.34), 0 0 0 3px #f2c94c inset; }}
+    .number {{ font-size: 24px; font-weight: 800; }}
+    .net {{ color: #e5e7eb; font-size: 13px; }}
+    table {{ width: 100%; border-collapse: collapse; margin-top: 22px; background: #151a1f; }}
+    th, td {{ border: 1px solid #27313b; padding: 10px; text-align: left; }}
+    th {{ color: #f2c94c; }}
+  </style>
+</head>
+<body>
+  <main>
+    <h1>{html.escape(result['combo_id'])}</h1>
+    <div class="summary">
+      {metric_card('Rank', result['rank'])}
+      {metric_card('Score', round(float(result['score']), 4))}
+      {metric_card('Coverage', percent(metrics['coverage_probability']))}
+      {metric_card('Profit probability', percent(metrics['profit_probability']))}
+      {metric_card('Max profit', metrics['max_profit'])}
+    </div>
+    <section class="board">
+      {zero_cell}
+      <div class="grid">{number_cells}</div>
+    </section>
+    <table>
+      <thead><tr><th>Bet</th><th>Type</th><th>Stake</th><th>Numbers</th></tr></thead>
+      <tbody>{bet_rows}</tbody>
+    </table>
+  </main>
+</body>
+</html>
+""",
+        encoding="utf-8",
+    )
+
+
+def render_number_cell(number: int, outcome: dict[str, Any], extra_class: str = "") -> str:
+    """Render one roulette board cell."""
+    color = number_color(number)
+    tone = "hit" if outcome["is_big_hit"] else "profit" if outcome["is_profitable"] else "loss"
+    title = html.escape(outcome["explanation"])
+    return (
+        f'<div class="cell {extra_class} {color} {tone}" title="{title}">'
+        f'<span class="number">{number}</span><span class="net">net {outcome["net_profit"]}</span></div>'
+    )
+
+
+def number_color(number: int) -> str:
+    """Return display color class for a roulette number."""
+    red = {1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36}
+    if number == 0:
+        return "green"
+    return "red" if number in red else "black"
+
+
+def metric_card(label: str, value: Any) -> str:
+    """Render one metric card."""
+    return f'<div class="metric"><span>{html.escape(str(label))}</span><strong>{html.escape(str(value))}</strong></div>'
+
+
+def percent(value: float) -> str:
+    """Format a ratio as a percentage."""
+    return f"{float(value) * 100:.1f}%"
 
 
 def build_paths_html(paths: list[dict[str, Any]], max_paths: int) -> str:
