@@ -22,8 +22,8 @@ Le systeme ne cherche pas a battre mathematiquement la roulette. L'esperance res
 ## Apercu Des Visualisations
 
 <p align="center">
-  <img alt="Apercu du tapis roulette avec heatmap de gains" src="docs/assets/roulette-board-preview.svg" width="49%">
-  <img alt="Apercu des trajectoires Monte Carlo" src="docs/assets/monte-carlo-preview.svg" width="49%">
+  <img alt="Capture du plan de pose des jetons genere par roulette_board.html" src="docs/assets/roulette-board-html.png" width="49%">
+  <img alt="Capture des trajectoires Monte Carlo generees par monte_carlo_paths.html" src="docs/assets/monte-carlo-html.png" width="49%">
 </p>
 
 Le backend genere ces vues sous forme de fichiers HTML ouvrables directement :
