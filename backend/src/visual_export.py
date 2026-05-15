@@ -247,9 +247,10 @@ def export_roulette_board_html(result: dict[str, Any] | None, path: Path) -> Non
         for number in row
     )
     zero_cell = render_number_cell(0, outcome_by_number[0], extra_class="zero")
+    chip_plan_svg = render_chip_plan_svg(result["bets"])
     bet_rows = "\n".join(
-        f"<tr><td>{html.escape(bet['bet_id'])}</td><td>{html.escape(bet['type'])}</td><td>{bet['stake']}</td><td>{html.escape('-'.join(str(number) for number in bet['numbers']))}</td></tr>"
-        for bet in result["bets"]
+        f"<tr><td>{index}</td><td><strong>{bet['stake']}€</strong></td><td>{html.escape(bet_type_label(bet))}</td><td>{html.escape(placement_instruction(bet))}</td><td>{html.escape('-'.join(str(number) for number in bet['numbers']))}</td></tr>"
+        for index, bet in enumerate(result["bets"], start=1)
     )
     metrics = result["metrics"]
 
@@ -264,10 +265,15 @@ def export_roulette_board_html(result: dict[str, Any] | None, path: Path) -> Non
     body {{ margin: 0; background: #101214; color: #f8fafc; font-family: Arial, sans-serif; }}
     main {{ width: min(1280px, calc(100% - 40px)); margin: 0 auto; padding: 30px 0; }}
     h1 {{ margin: 0 0 8px; font-size: 34px; }}
+    h2 {{ margin: 28px 0 12px; font-size: 24px; }}
+    .hint {{ color: #cbd5e1; margin: 0 0 18px; }}
     .summary {{ display: grid; grid-template-columns: repeat(5, minmax(120px, 1fr)); gap: 10px; margin: 20px 0; }}
     .metric {{ background: #151a1f; border: 1px solid #27313b; border-radius: 8px; padding: 14px; }}
     .metric span {{ color: #94a3b8; display: block; font-size: 12px; }}
     .metric strong {{ font-size: 22px; display: block; margin-top: 8px; }}
+    .placement {{ border: 1px solid #27313b; border-radius: 8px; background: #151a1f; padding: 16px; }}
+    .placement svg {{ width: 100%; height: auto; display: block; }}
+    .chip-note {{ color: #94a3b8; margin: 12px 0 0; font-size: 14px; }}
     .board {{ display: grid; grid-template-columns: 80px 1fr; border: 1px solid #d1d5db; background: #0e402b; }}
     .grid {{ display: grid; grid-template-columns: repeat(12, 1fr); }}
     .cell {{ min-height: 92px; border: 1px solid rgba(255,255,255,0.5); display: grid; align-content: center; justify-items: center; gap: 8px; color: white; }}
@@ -295,14 +301,25 @@ def export_roulette_board_html(result: dict[str, Any] | None, path: Path) -> Non
       {metric_card('Profit probability', percent(metrics['profit_probability']))}
       {metric_card('Max profit', metrics['max_profit'])}
     </div>
+
+    <h2>Plan de pose des jetons</h2>
+    <p class="hint">Chaque jeton numerote correspond a une ligne du tableau. C'est uniquement la strategie gagnante du batch : {html.escape(result['combo_id'])}.</p>
+    <section class="placement">
+      {chip_plan_svg}
+      <p class="chip-note">Les paris exterieurs comme impair ou passe sont places dans la zone basse dediee. Les chevaux, carres et transversales sont positionnes au milieu des numeros couverts.</p>
+    </section>
+
+    <table>
+      <thead><tr><th>#</th><th>Montant</th><th>Type</th><th>Ou placer le jeton</th><th>Numeros couverts</th></tr></thead>
+      <tbody>{bet_rows}</tbody>
+    </table>
+
+    <h2>Heatmap des resultats</h2>
+    <p class="hint">Cette vue montre le gain net obtenu si chaque numero sort.</p>
     <section class="board">
       {zero_cell}
       <div class="grid">{number_cells}</div>
     </section>
-    <table>
-      <thead><tr><th>Bet</th><th>Type</th><th>Stake</th><th>Numbers</th></tr></thead>
-      <tbody>{bet_rows}</tbody>
-    </table>
   </main>
 </body>
 </html>
@@ -320,6 +337,157 @@ def render_number_cell(number: int, outcome: dict[str, Any], extra_class: str = 
         f'<div class="cell {extra_class} {color} {tone}" title="{title}">'
         f'<span class="number">{number}</span><span class="net">net {outcome["net_profit"]}</span></div>'
     )
+
+
+def render_chip_plan_svg(bets: list[dict[str, Any]]) -> str:
+    """Render a schematic roulette table with numbered chips for placement."""
+    width = 1180
+    height = 560
+    cell_w = 76
+    cell_h = 96
+    zero_w = 84
+    board_x = 36
+    board_y = 36
+    outside_y = board_y + cell_h * 3 + 34
+    outside_boxes = [
+        ("dozen_1", "1st 12", board_x + zero_w, outside_y, cell_w * 4, 54),
+        ("dozen_2", "2nd 12", board_x + zero_w + cell_w * 4, outside_y, cell_w * 4, 54),
+        ("dozen_3", "3rd 12", board_x + zero_w + cell_w * 8, outside_y, cell_w * 4, 54),
+        ("even_money_low", "1-18", board_x + zero_w, outside_y + 66, cell_w * 2, 54),
+        ("even_money_even", "PAIR", board_x + zero_w + cell_w * 2, outside_y + 66, cell_w * 2, 54),
+        ("even_money_red", "ROUGE", board_x + zero_w + cell_w * 4, outside_y + 66, cell_w * 2, 54),
+        ("even_money_black", "NOIR", board_x + zero_w + cell_w * 6, outside_y + 66, cell_w * 2, 54),
+        ("even_money_odd", "IMPAIR", board_x + zero_w + cell_w * 8, outside_y + 66, cell_w * 2, 54),
+        ("even_money_high", "19-36", board_x + zero_w + cell_w * 10, outside_y + 66, cell_w * 2, 54),
+    ]
+    outside_lookup = {key: (x + w / 2, y + h / 2) for key, _, x, y, w, h in outside_boxes}
+
+    cells = [
+        f'<rect x="{board_x}" y="{board_y}" width="{zero_w}" height="{cell_h * 3}" fill="#0f5132" stroke="#d1d5db" stroke-width="2"/>',
+        f'<text x="{board_x + zero_w / 2}" y="{board_y + cell_h * 1.62}" text-anchor="middle" font-size="34" font-weight="800" fill="#ffffff">0</text>',
+    ]
+    for number in range(1, 37):
+        x, y = number_cell_origin(number, board_x, board_y, zero_w, cell_w, cell_h)
+        cells.append(f'<rect x="{x}" y="{y}" width="{cell_w}" height="{cell_h}" fill="{number_fill(number)}" stroke="#d1d5db" stroke-width="2"/>')
+        cells.append(f'<text x="{x + cell_w / 2}" y="{y + cell_h / 2 + 8}" text-anchor="middle" font-size="24" font-weight="800" fill="#ffffff">{number}</text>')
+
+    outside = [
+        f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="4" fill="#123d2b" stroke="#d1d5db" stroke-width="2"/><text x="{x + w / 2}" y="{y + h / 2 + 6}" text-anchor="middle" font-size="20" font-weight="800" fill="#ffffff">{label}</text>'
+        for _, label, x, y, w, h in outside_boxes
+    ]
+    chips = []
+    for index, bet in enumerate(bets, start=1):
+        x, y = chip_position(bet, board_x, board_y, zero_w, cell_w, cell_h, outside_lookup)
+        chips.append(render_chip(index, bet["stake"], x, y))
+
+    return f"""<svg viewBox="0 0 {width} {height}" role="img" aria-label="Plan de pose des jetons">
+  <rect width="{width}" height="{height}" rx="10" fill="#0d281d"/>
+  <g font-family="Arial, sans-serif">{''.join(cells)}{''.join(outside)}{''.join(chips)}</g>
+</svg>"""
+
+
+def render_chip(index: int, stake: int, x: float, y: float) -> str:
+    """Render one numbered chip."""
+    radius = 18 if stake < 10 else 21
+    return (
+        f'<g><circle cx="{x:.1f}" cy="{y:.1f}" r="{radius}" fill="#f8fafc" stroke="#f2c94c" stroke-width="5"/>'
+        f'<circle cx="{x:.1f}" cy="{y:.1f}" r="{radius - 7}" fill="#111827"/>'
+        f'<text x="{x:.1f}" y="{y - 2:.1f}" text-anchor="middle" font-size="11" font-weight="800" fill="#ffffff">{index}</text>'
+        f'<text x="{x:.1f}" y="{y + 11:.1f}" text-anchor="middle" font-size="10" font-weight="800" fill="#f2c94c">{stake}€</text></g>'
+    )
+
+
+def chip_position(
+    bet: dict[str, Any],
+    board_x: int,
+    board_y: int,
+    zero_w: int,
+    cell_w: int,
+    cell_h: int,
+    outside_lookup: dict[str, tuple[float, float]],
+) -> tuple[float, float]:
+    """Calculate a readable chip placement position."""
+    bet_id = bet["bet_id"]
+    if bet_id in outside_lookup:
+        return outside_lookup[bet_id]
+    if bet["type"] == "dozen":
+        dozen_key = f"dozen_{((min(bet['numbers']) - 1) // 12) + 1}"
+        if dozen_key in outside_lookup:
+            return outside_lookup[dozen_key]
+
+    centers = [number_center(number, board_x, board_y, zero_w, cell_w, cell_h) for number in bet["numbers"]]
+    x = sum(point[0] for point in centers) / len(centers)
+    y = sum(point[1] for point in centers) / len(centers)
+    return x, y
+
+
+def number_center(number: int, board_x: int, board_y: int, zero_w: int, cell_w: int, cell_h: int) -> tuple[float, float]:
+    """Return center point for a roulette number on the schematic table."""
+    if number == 0:
+        return board_x + zero_w / 2, board_y + cell_h * 1.5
+    x, y = number_cell_origin(number, board_x, board_y, zero_w, cell_w, cell_h)
+    return x + cell_w / 2, y + cell_h / 2
+
+
+def number_cell_origin(number: int, board_x: int, board_y: int, zero_w: int, cell_w: int, cell_h: int) -> tuple[int, int]:
+    """Return top-left point for a roulette number cell."""
+    column = (number - 1) // 3
+    row = 2 - ((number - 1) % 3)
+    return board_x + zero_w + column * cell_w, board_y + row * cell_h
+
+
+def number_fill(number: int) -> str:
+    """Return SVG fill for a roulette number."""
+    if number == 0:
+        return "#0f5132"
+    return "#8f1d1d" if number_color(number) == "red" else "#111111"
+
+
+def bet_type_label(bet: dict[str, Any]) -> str:
+    """Return French display label for a bet."""
+    labels = {
+        "straight": "Plein",
+        "split": "Cheval",
+        "street": "Transversale",
+        "corner": "Carre",
+        "sixline": "Sixain",
+        "dozen": "Douzaine",
+        "column": "Colonne",
+        "even_money": "Chance simple",
+    }
+    return labels.get(bet["type"], bet["type"])
+
+
+def placement_instruction(bet: dict[str, Any]) -> str:
+    """Return a human-readable placement instruction."""
+    numbers = "-".join(str(number) for number in bet["numbers"])
+    if bet["type"] == "straight":
+        return f"Sur le numero {bet['numbers'][0]}"
+    if bet["type"] == "split":
+        return f"A cheval entre {numbers}"
+    if bet["type"] == "street":
+        return f"Sur la ligne {numbers}"
+    if bet["type"] == "corner":
+        return f"A l'intersection du carre {numbers}"
+    if bet["type"] == "sixline":
+        return f"Sur la double ligne {numbers}"
+    if bet["type"] == "dozen":
+        return f"Sur la douzaine couvrant {numbers}"
+    if bet["type"] == "column":
+        return f"Sur la colonne couvrant {numbers}"
+    if bet["bet_id"] == "even_money_odd":
+        return "Sur IMPAIR"
+    if bet["bet_id"] == "even_money_even":
+        return "Sur PAIR"
+    if bet["bet_id"] == "even_money_low":
+        return "Sur 1-18"
+    if bet["bet_id"] == "even_money_high":
+        return "Sur 19-36"
+    if bet["bet_id"] == "even_money_red":
+        return "Sur ROUGE"
+    if bet["bet_id"] == "even_money_black":
+        return "Sur NOIR"
+    return f"Sur {numbers}"
 
 
 def number_color(number: int) -> str:
