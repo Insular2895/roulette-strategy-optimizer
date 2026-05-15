@@ -19,6 +19,21 @@ Le projet vise a generer automatiquement des milliers de structures de paris, ev
 
 Le systeme ne cherche pas a battre mathematiquement la roulette. L'esperance reste negative a cause du 0, de la variance et de l'avantage structurel du casino. L'objectif est analytique : optimiser le comportement d'une session, identifier les profils de risque les plus efficaces, maximiser les probabilites de hits interessants et ralentir la destruction de bankroll.
 
+## Apercu Des Visualisations
+
+<p align="center">
+  <img alt="Apercu du tapis roulette avec heatmap de gains" src="docs/assets/roulette-board-preview.svg" width="49%">
+  <img alt="Apercu des trajectoires Monte Carlo" src="docs/assets/monte-carlo-preview.svg" width="49%">
+</p>
+
+Le backend genere ces vues sous forme de fichiers HTML ouvrables directement :
+
+- `outputs/report.html` : index de toutes les sorties generees ;
+- `outputs/roulette_board.html` : tapis roulette avec gains nets par numero ;
+- `outputs/monte_carlo_paths.html` : trajectoires bankroll par session ;
+- `outputs/monte_carlo_summary.html` : distribution et drawdown ;
+- `outputs/monte_carlo_comparison.html` : comparaison des meilleures strategies.
+
 ## Ce Que Le Moteur Doit Faire
 
 - Prendre une bankroll fixe, par exemple `100`.

@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 620" role="img" aria-labelledby="title desc">
+  <title id="title">Monte Carlo visualization preview</title>
+  <desc id="desc">Preview of transparent Monte Carlo bankroll paths with average and summary metrics.</desc>
+  <rect width="980" height="620" rx="18" fill="#0e1116"/>
+  <rect x="28" y="28" width="924" height="564" rx="12" fill="#111820" stroke="#2b3642"/>
+  <text x="58" y="78" font-family="Arial, sans-serif" font-size="34" font-weight="800" fill="#f8fafc">Monte Carlo Paths</text>
+  <text x="58" y="112" font-family="Arial, sans-serif" font-size="17" fill="#94a3b8">Session trajectories, average curve, dispersion, drawdown and final bankroll distribution.</text>
+
+  <g transform="translate(76 154)">
+    <rect width="830" height="310" rx="8" fill="#0f141a" stroke="#2b3642"/>
+    <g stroke="#27313b" stroke-width="1">
+      <path d="M70 24V286M190 24V286M310 24V286M430 24V286M550 24V286M670 24V286M790 24V286"/>
+      <path d="M34 60H800M34 120H800M34 180H800M34 240H800"/>
+    </g>
+    <g fill="none" stroke-linecap="round">
+      <path d="M46 184C90 160 122 205 166 190S234 104 282 130 364 244 430 214 512 102 580 134 660 286 788 250" stroke="#38bdf8" stroke-width="2" opacity="0.22"/>
+      <path d="M46 180C110 218 150 250 220 220S330 130 392 160 492 212 548 198 650 104 788 72" stroke="#2dd4bf" stroke-width="2" opacity="0.24"/>
+      <path d="M46 184C106 164 166 170 216 148S304 86 366 112 450 198 520 168 620 122 788 142" stroke="#a78bfa" stroke-width="2" opacity="0.22"/>
+      <path d="M46 184C100 194 144 208 202 194S310 172 372 212 472 282 536 246 654 156 788 204" stroke="#f472b6" stroke-width="2" opacity="0.22"/>
+      <path d="M46 184C112 142 176 166 232 156S330 120 396 138 504 180 570 154 670 80 788 116" stroke="#f2c94c" stroke-width="2" opacity="0.25"/>
+      <path d="M46 184C106 180 166 190 226 176S348 150 420 164 534 192 610 172 700 154 788 146" stroke="#ffffff" stroke-width="5" opacity="0.92"/>
+      <path d="M46 184C106 180 166 190 226 176S348 150 420 164 534 192 610 172 700 154 788 146" stroke="#f2c94c" stroke-width="3" opacity="1"/>
+    </g>
+    <g font-family="Arial, sans-serif" fill="#94a3b8" font-size="13">
+      <text x="28" y="302">0</text>
+      <text x="766" y="302">100 spins</text>
+      <text x="0" y="188">1000</text>
+      <text x="0" y="64">1400</text>
+    </g>
+  </g>
+
+  <g transform="translate(58 502)" font-family="Arial, sans-serif">
+    <rect width="172" height="72" rx="8" fill="#151a1f" stroke="#2b3642"/>
+    <rect x="188" width="172" height="72" rx="8" fill="#151a1f" stroke="#2b3642"/>
+    <rect x="376" width="172" height="72" rx="8" fill="#151a1f" stroke="#2b3642"/>
+    <rect x="564" width="172" height="72" rx="8" fill="#151a1f" stroke="#2b3642"/>
+    <rect x="752" width="172" height="72" rx="8" fill="#151a1f" stroke="#2b3642"/>
+    <text x="16" y="28" font-size="14" fill="#94a3b8">Avg final</text><text x="16" y="54" font-size="24" font-weight="800" fill="#ffffff">942.8</text>
+    <text x="204" y="28" font-size="14" fill="#94a3b8">Profit</text><text x="204" y="54" font-size="24" font-weight="800" fill="#ffffff">31%</text>
+    <text x="392" y="28" font-size="14" fill="#94a3b8">Bust</text><text x="392" y="54" font-size="24" font-weight="800" fill="#ffffff">7%</text>
+    <text x="580" y="28" font-size="14" fill="#94a3b8">Drawdown</text><text x="580" y="54" font-size="24" font-weight="800" fill="#ffffff">238</text>
+    <text x="768" y="28" font-size="14" fill="#94a3b8">Big hit</text><text x="768" y="54" font-size="24" font-weight="800" fill="#ffffff">199</text>
+  </g>
+</svg>
