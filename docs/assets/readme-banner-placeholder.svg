@@ -46,12 +46,14 @@
     <circle cx="305" cy="141" r="46" fill="#2dd4bf" opacity="0.34"/>
   </g>
   <g fill="none" stroke-linecap="round" opacity="0.78">
-    <path d="M790 340C870 300 920 370 990 310S1120 170 1210 230 1360 390 1500 210" stroke="#2dd4bf" stroke-width="5"/>
-    <path d="M790 275C870 260 910 245 975 265S1100 335 1195 285 1320 160 1500 190" stroke="#f2d16b" stroke-width="5"/>
-    <path d="M790 390C880 410 940 330 1010 350S1140 430 1225 360 1345 285 1500 315" stroke="#a78bfa" stroke-width="4"/>
+    <path d="M760 350C845 300 920 370 990 310S1120 170 1210 230 1360 390 1500 210" stroke="#2dd4bf" stroke-width="5"/>
+    <path d="M760 285C855 260 910 245 975 265S1100 335 1195 285 1320 160 1500 190" stroke="#f2d16b" stroke-width="5"/>
+    <path d="M760 400C880 410 940 330 1010 350S1140 430 1225 360 1345 285 1500 315" stroke="#a78bfa" stroke-width="4"/>
   </g>
-  <text x="790" y="145" font-family="Arial, sans-serif" font-size="64" font-weight="800" fill="#ffffff">Roulette Strategy Optimizer</text>
-  <text x="794" y="200" font-family="Arial, sans-serif" font-size="28" fill="#d7dde4">Grid search, scoring theorique, Monte Carlo et visualisation quantitative</text>
-  <rect x="794" y="235" width="315" height="42" rx="6" fill="url(#gold)"/>
-  <text x="952" y="264" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#141414">European Roulette Analytics</text>
+  <text x="760" y="135" font-family="Arial, sans-serif" font-size="58" font-weight="800" fill="#ffffff">Roulette Strategy</text>
+  <text x="760" y="198" font-family="Arial, sans-serif" font-size="58" font-weight="800" fill="#ffffff">Optimizer</text>
+  <text x="764" y="242" font-family="Arial, sans-serif" font-size="24" fill="#d7dde4">Grid search, scoring theorique et Monte Carlo</text>
+  <text x="764" y="274" font-family="Arial, sans-serif" font-size="24" fill="#d7dde4">pour visualiser des strategies roulette</text>
+  <rect x="764" y="308" width="315" height="42" rx="6" fill="url(#gold)"/>
+  <text x="922" y="337" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#141414">European Roulette Analytics</text>
 </svg>
