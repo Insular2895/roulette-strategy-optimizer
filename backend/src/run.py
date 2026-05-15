@@ -3,8 +3,19 @@
 from __future__ import annotations
 
 import argparse
+import sys
 from pathlib import Path
 from typing import Any
+
+if __package__ in {None, ""}:
+    sys.path.append(str(Path(__file__).resolve().parents[2]))
+    from backend.src.monte_carlo import run_monte_carlo
+    from backend.src.optimizer import optimize
+    from backend.src.visual_export import export_monte_carlo, export_monte_carlo_html, export_outputs
+else:
+    from .monte_carlo import run_monte_carlo
+    from .optimizer import optimize
+    from .visual_export import export_monte_carlo, export_monte_carlo_html, export_outputs
 
 
 DEFAULT_CONFIG_PATH = Path(__file__).resolve().parents[2] / "config.yaml"
@@ -91,6 +102,14 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--profile", choices=("safe", "balanced", "aggressive"), help="Optimization profile")
     parser.add_argument("--bankroll", type=int, help="Total bankroll allocated to strategy generation")
     parser.add_argument("--units", type=parse_units, help="Comma-separated allowed stake units, for example 1,2,3,5,10")
+    parser.add_argument("--combos-to-generate", type=int, help="Override search.combos_to_generate")
+    parser.add_argument("--keep-top-n", type=int, help="Override search.keep_top_n")
+    parser.add_argument("--monte-carlo-sessions", type=int, help="Override monte_carlo.sessions")
+    parser.add_argument("--spins-per-session", type=int, help="Override monte_carlo.spins_per_session")
+    parser.add_argument("--initial-bankroll", type=int, help="Override monte_carlo.initial_bankroll")
+    parser.add_argument("--output-dir", type=Path, default=Path("outputs"), help="Output directory")
+    parser.add_argument("--seed", type=int, default=42, help="Random seed for reproducible runs")
+    parser.add_argument("--skip-monte-carlo", action="store_true", help="Only run theoretical optimization exports")
     return parser
 
 
@@ -102,6 +121,16 @@ def apply_overrides(config: dict[str, Any], args: argparse.Namespace) -> dict[st
         config.setdefault("bankroll", {})["total"] = args.bankroll
     if args.units:
         config.setdefault("bankroll", {})["allowed_units"] = args.units
+    if args.combos_to_generate is not None:
+        config.setdefault("search", {})["combos_to_generate"] = args.combos_to_generate
+    if args.keep_top_n is not None:
+        config.setdefault("search", {})["keep_top_n"] = args.keep_top_n
+    if args.monte_carlo_sessions is not None:
+        config.setdefault("monte_carlo", {})["sessions"] = args.monte_carlo_sessions
+    if args.spins_per_session is not None:
+        config.setdefault("monte_carlo", {})["spins_per_session"] = args.spins_per_session
+    if args.initial_bankroll is not None:
+        config.setdefault("monte_carlo", {})["initial_bankroll"] = args.initial_bankroll
     return config
 
 
@@ -114,8 +143,26 @@ def main() -> int:
     profile = config.get("objective", {}).get("profile", "balanced")
     bankroll = config.get("bankroll", {}).get("total")
     units = config.get("bankroll", {}).get("allowed_units", [])
-    print(f"Roulette Strategy Optimizer ready: profile={profile}, bankroll={bankroll}, units={units}")
-    print("Pipeline implementation starts in the next backend step.")
+    print(f"Roulette Strategy Optimizer: profile={profile}, bankroll={bankroll}, units={units}")
+
+    strategies = optimize(config, seed=args.seed)
+    data_paths = export_outputs(strategies, args.output_dir)
+    print(f"Theoretical exports: {', '.join(str(path) for path in data_paths.values())}")
+
+    if not args.skip_monte_carlo:
+        monte_carlo_config = config.get("monte_carlo", {})
+        simulation = run_monte_carlo(
+            strategies,
+            sessions=int(monte_carlo_config.get("sessions", 10000)),
+            spins_per_session=int(monte_carlo_config.get("spins_per_session", 100)),
+            initial_bankroll=float(monte_carlo_config.get("initial_bankroll", 1000)),
+            seed=args.seed,
+        )
+        monte_carlo_paths = export_monte_carlo(simulation, args.output_dir)
+        html_paths = export_monte_carlo_html(simulation, args.output_dir)
+        print(f"Monte Carlo exports: {', '.join(str(path) for path in monte_carlo_paths.values())}")
+        print(f"HTML exports: {', '.join(str(path) for path in html_paths.values())}")
+
     return 0
 
 
