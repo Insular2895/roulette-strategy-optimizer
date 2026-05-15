@@ -30,6 +30,8 @@ BEST_COMBOS_COLUMNS = [
     "mc_probability_profit",
     "mc_probability_bust",
     "mc_avg_max_drawdown",
+    "robust_filter_pass",
+    "robust_filter_reasons",
 ]
 
 NUMBER_OUTCOMES_COLUMNS = [
@@ -114,6 +116,8 @@ def export_best_combos(results: list[dict[str, Any]], path: Path) -> None:
                     "mc_probability_profit": result.get("monte_carlo", {}).get("probability_profit"),
                     "mc_probability_bust": result.get("monte_carlo", {}).get("probability_bust"),
                     "mc_avg_max_drawdown": result.get("monte_carlo", {}).get("avg_max_drawdown"),
+                    "robust_filter_pass": result.get("monte_carlo", {}).get("robust_filter_pass"),
+                    "robust_filter_reasons": "; ".join(result.get("monte_carlo", {}).get("robust_filter_reasons", [])),
                 }
             )
 
@@ -252,7 +256,11 @@ def export_roulette_board_html(result: dict[str, Any] | None, path: Path) -> Non
         return
 
     outcome_by_number = {outcome["number"]: outcome for outcome in result["outcomes"]}
-    rows = [[3 + index * 3, 2 + index * 3, 1 + index * 3] for index in range(12)]
+    rows = [
+        list(range(3, 37, 3)),
+        list(range(2, 36, 3)),
+        list(range(1, 35, 3)),
+    ]
     number_cells = "\n".join(
         render_number_cell(number, outcome_by_number[number])
         for row in rows

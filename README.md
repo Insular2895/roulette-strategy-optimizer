@@ -134,6 +134,13 @@ monte_carlo:
   sessions: 10000
   spins_per_session: 100
   initial_bankroll: 1000
+
+robust_filter:
+  enabled: true
+  max_probability_bust: 0.65
+  max_avg_drawdown: 1400
+  max_drawdown_seen: 3200
+  min_probability_profit: 0.30
 ```
 
 ## Mises Supportees
@@ -239,6 +246,8 @@ Il penalise :
 - la probabilite de ruine ;
 - le drawdown moyen ;
 - le pire drawdown observe.
+
+Le filtre robuste peut aussi rejeter directement les strategies trop dangereuses avant le classement final, selon `robust_filter`.
 
 ## Outputs
 

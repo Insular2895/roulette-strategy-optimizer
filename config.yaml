@@ -35,6 +35,13 @@ monte_carlo:
   spins_per_session: 100
   initial_bankroll: 1000
 
+robust_filter:
+  enabled: true
+  max_probability_bust: 0.65
+  max_avg_drawdown: 1400
+  max_drawdown_seen: 3200
+  min_probability_profit: 0.30
+
 profiles:
   safe:
     coverage_weight: 0.55

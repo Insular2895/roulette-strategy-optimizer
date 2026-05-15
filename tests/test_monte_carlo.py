@@ -75,6 +75,16 @@ class MonteCarloTest(unittest.TestCase):
         self.assertIn("robust_score", reranked[0]["monte_carlo"])
         self.assertGreaterEqual(reranked[0]["monte_carlo"]["robust_score"], reranked[-1]["monte_carlo"]["robust_score"])
 
+    def test_monte_carlo_rerank_applies_hard_filter(self):
+        strategies = optimize(make_config(), seed=3)
+        simulation = run_monte_carlo(strategies, sessions=5, spins_per_session=8, initial_bankroll=60, seed=10)
+        strict_filter = {"enabled": True, "max_probability_bust": 0.0, "min_probability_profit": 1.0}
+
+        reranked = rerank_by_monte_carlo(strategies, simulation, strict_filter)
+
+        self.assertTrue(reranked)
+        self.assertIn("robust_filter_pass", reranked[0]["monte_carlo"])
+
 
 if __name__ == "__main__":
     unittest.main()

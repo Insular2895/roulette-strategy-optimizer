@@ -30,15 +30,23 @@ def run_monte_carlo(
 def rerank_by_monte_carlo(
     strategies: list[dict[str, Any]],
     simulation: dict[str, list[dict[str, Any]]],
+    robust_filter: dict[str, Any] | None = None,
 ) -> list[dict[str, Any]]:
     """Return strategies reranked by robust Monte Carlo behavior."""
+    robust_filter = robust_filter or {}
     result_by_combo = {result["combo_id"]: result for result in simulation["results"]}
     enriched: list[dict[str, Any]] = []
 
     for strategy in strategies:
         result = result_by_combo[strategy["combo_id"]]
         robust_score = calculate_robust_score(result, strategy["metrics"])
-        monte_carlo_metrics = {**result, "robust_score": robust_score}
+        filter_pass, filter_reasons = evaluate_robust_filter(result, robust_filter)
+        monte_carlo_metrics = {
+            **result,
+            "robust_score": robust_score,
+            "robust_filter_pass": filter_pass,
+            "robust_filter_reasons": filter_reasons,
+        }
         enriched.append(
             {
                 **strategy,
@@ -47,14 +55,41 @@ def rerank_by_monte_carlo(
             }
         )
 
-    enriched.sort(key=lambda strategy: strategy["monte_carlo"]["robust_score"], reverse=True)
+    passing = [strategy for strategy in enriched if strategy["monte_carlo"]["robust_filter_pass"]]
+    ranking_pool = passing or enriched
+    ranking_pool.sort(key=lambda strategy: strategy["monte_carlo"]["robust_score"], reverse=True)
     return [
         {
             **strategy,
             "rank": rank,
         }
-        for rank, strategy in enumerate(enriched, start=1)
+        for rank, strategy in enumerate(ranking_pool, start=1)
     ]
+
+
+def evaluate_robust_filter(result: dict[str, Any], robust_filter: dict[str, Any]) -> tuple[bool, list[str]]:
+    """Check hard Monte Carlo constraints."""
+    if not robust_filter.get("enabled", True):
+        return True, []
+
+    checks = [
+        ("probability_bust", "<=", robust_filter.get("max_probability_bust")),
+        ("avg_max_drawdown", "<=", robust_filter.get("max_avg_drawdown")),
+        ("max_drawdown_seen", "<=", robust_filter.get("max_drawdown_seen")),
+        ("probability_profit", ">=", robust_filter.get("min_probability_profit")),
+    ]
+    reasons: list[str] = []
+    for metric, operator, threshold in checks:
+        if threshold is None:
+            continue
+        value = float(result.get(metric, 0.0))
+        limit = float(threshold)
+        if operator == "<=" and value > limit:
+            reasons.append(f"{metric}={value:.4g} > {limit:.4g}")
+        if operator == ">=" and value < limit:
+            reasons.append(f"{metric}={value:.4g} < {limit:.4g}")
+
+    return not reasons, reasons
 
 
 def calculate_robust_score(result: dict[str, Any], metrics: dict[str, Any]) -> float:

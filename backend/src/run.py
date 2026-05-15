@@ -166,7 +166,7 @@ def main() -> int:
             initial_bankroll=float(monte_carlo_config.get("initial_bankroll", 1000)),
             seed=args.seed,
         )
-        strategies = rerank_by_monte_carlo(strategies, simulation)
+        strategies = rerank_by_monte_carlo(strategies, simulation, config.get("robust_filter", {}))
         data_paths = export_outputs(strategies, args.output_dir)
         monte_carlo_paths = export_monte_carlo(simulation, args.output_dir)
         html_paths = export_monte_carlo_html(simulation, args.output_dir)
