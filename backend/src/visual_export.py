@@ -5,6 +5,7 @@ from __future__ import annotations
 import csv
 import json
 from pathlib import Path
+from statistics import mean, median
 from typing import Any
 
 
@@ -150,3 +151,172 @@ def write_csv(path: Path, columns: list[str], rows: list[dict[str, Any]]) -> Non
         writer.writeheader()
         for row in rows:
             writer.writerow({column: row.get(column) for column in columns})
+
+
+def export_monte_carlo_html(
+    simulation: dict[str, list[dict[str, Any]]],
+    output_dir: str | Path = "outputs",
+    max_paths: int = 1000,
+) -> dict[str, Path]:
+    """Export Plotly HTML views for Monte Carlo paths, summary and comparison."""
+    output_path = Path(output_dir)
+    output_path.mkdir(parents=True, exist_ok=True)
+    paths = {
+        "monte_carlo_paths_html": output_path / "monte_carlo_paths.html",
+        "monte_carlo_summary_html": output_path / "monte_carlo_summary.html",
+        "monte_carlo_comparison_html": output_path / "monte_carlo_comparison.html",
+    }
+
+    paths["monte_carlo_paths_html"].write_text(build_paths_html(simulation["paths"], max_paths), encoding="utf-8")
+    paths["monte_carlo_summary_html"].write_text(build_summary_html(simulation["results"], simulation["paths"]), encoding="utf-8")
+    paths["monte_carlo_comparison_html"].write_text(build_comparison_html(simulation["results"]), encoding="utf-8")
+    return paths
+
+
+def build_paths_html(paths: list[dict[str, Any]], max_paths: int) -> str:
+    """Build Monte Carlo path HTML with individual and average curves."""
+    grouped = group_paths(paths)
+    traces: list[dict[str, Any]] = []
+
+    for index, ((combo_id, session_id), points) in enumerate(grouped.items()):
+        if index >= max_paths:
+            break
+        traces.append(
+            {
+                "x": [point["spin_index"] for point in points],
+                "y": [point["bankroll"] for point in points],
+                "type": "scatter",
+                "mode": "lines",
+                "name": f"{combo_id} / session {session_id}",
+                "line": {"width": 1, "color": "rgba(80, 160, 220, 0.18)"},
+                "hoverinfo": "skip",
+                "showlegend": False,
+            }
+        )
+
+    for combo_id, points_by_spin in group_by_combo_and_spin(paths).items():
+        spins = sorted(points_by_spin)
+        traces.append(
+            {
+                "x": spins,
+                "y": [mean(points_by_spin[spin]) for spin in spins],
+                "type": "scatter",
+                "mode": "lines",
+                "name": f"{combo_id} average",
+                "line": {"width": 4},
+            }
+        )
+        traces.append(
+            {
+                "x": spins,
+                "y": [median(points_by_spin[spin]) for spin in spins],
+                "type": "scatter",
+                "mode": "lines",
+                "name": f"{combo_id} median",
+                "line": {"width": 2, "dash": "dash"},
+            }
+        )
+
+    return plotly_html(
+        "Monte Carlo Paths",
+        traces,
+        {"xaxis": {"title": "Spin"}, "yaxis": {"title": "Bankroll"}, "hovermode": "x unified"},
+    )
+
+
+def build_summary_html(results: list[dict[str, Any]], paths: list[dict[str, Any]]) -> str:
+    """Build summary HTML with final bankroll distribution and drawdowns."""
+    final_bankrolls = final_bankroll_by_session(paths)
+    traces = [
+        {
+            "x": list(final_bankrolls.values()),
+            "type": "histogram",
+            "name": "Final bankroll distribution",
+            "marker": {"color": "#2dd4bf"},
+        },
+        {
+            "x": [result["combo_id"] for result in results],
+            "y": [result["avg_max_drawdown"] for result in results],
+            "type": "bar",
+            "name": "Average max drawdown",
+            "marker": {"color": "#f2c94c"},
+            "xaxis": "x2",
+            "yaxis": "y2",
+        },
+    ]
+    layout = {
+        "grid": {"rows": 1, "columns": 2, "pattern": "independent"},
+        "xaxis": {"title": "Final bankroll"},
+        "yaxis": {"title": "Sessions"},
+        "xaxis2": {"title": "Strategy"},
+        "yaxis2": {"title": "Drawdown"},
+    }
+    return plotly_html("Monte Carlo Summary", traces, layout)
+
+
+def build_comparison_html(results: list[dict[str, Any]]) -> str:
+    """Build strategy comparison HTML."""
+    combo_ids = [result["combo_id"] for result in results]
+    traces = [
+        {"x": combo_ids, "y": [result["final_bankroll_avg"] for result in results], "type": "bar", "name": "Final bankroll avg"},
+        {"x": combo_ids, "y": [result["probability_profit"] for result in results], "type": "bar", "name": "Probability profit"},
+        {"x": combo_ids, "y": [result["probability_bust"] for result in results], "type": "bar", "name": "Probability bust"},
+        {"x": combo_ids, "y": [result["biggest_hit_seen"] for result in results], "type": "bar", "name": "Biggest hit seen"},
+        {"x": combo_ids, "y": [result["big_hit_frequency"] for result in results], "type": "bar", "name": "Big hit frequency"},
+    ]
+    return plotly_html("Monte Carlo Comparison", traces, {"barmode": "group", "xaxis": {"title": "Strategy"}})
+
+
+def plotly_html(title: str, traces: list[dict[str, Any]], layout: dict[str, Any]) -> str:
+    """Build a standalone HTML document using Plotly from CDN."""
+    full_layout = {"title": title, "template": "plotly_dark", **layout}
+    return f"""<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{title}</title>
+  <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+  <style>
+    body {{ margin: 0; background: #111111; color: #f4f4f4; font-family: Arial, sans-serif; }}
+    #chart {{ width: 100vw; height: 100vh; }}
+  </style>
+</head>
+<body>
+  <div id="chart"></div>
+  <script>
+    const traces = {json.dumps(traces)};
+    const layout = {json.dumps(full_layout)};
+    Plotly.newPlot('chart', traces, layout, {{responsive: true}});
+  </script>
+</body>
+</html>
+"""
+
+
+def group_paths(paths: list[dict[str, Any]]) -> dict[tuple[str, int], list[dict[str, Any]]]:
+    """Group path rows by combo and session."""
+    grouped: dict[tuple[str, int], list[dict[str, Any]]] = {}
+    for point in paths:
+        grouped.setdefault((point["combo_id"], int(point["session_id"])), []).append(point)
+    return grouped
+
+
+def group_by_combo_and_spin(paths: list[dict[str, Any]]) -> dict[str, dict[int, list[float]]]:
+    """Group bankroll values by combo and spin."""
+    grouped: dict[str, dict[int, list[float]]] = {}
+    for point in paths:
+        combo = grouped.setdefault(point["combo_id"], {})
+        combo.setdefault(int(point["spin_index"]), []).append(float(point["bankroll"]))
+    return grouped
+
+
+def final_bankroll_by_session(paths: list[dict[str, Any]]) -> dict[tuple[str, int], float]:
+    """Return final bankroll for each combo/session path."""
+    finals: dict[tuple[str, int], tuple[int, float]] = {}
+    for point in paths:
+        key = (point["combo_id"], int(point["session_id"]))
+        spin_index = int(point["spin_index"])
+        if key not in finals or spin_index >= finals[key][0]:
+            finals[key] = (spin_index, float(point["bankroll"]))
+    return {key: value for key, (_, value) in finals.items()}
