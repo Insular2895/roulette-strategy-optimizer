@@ -7,6 +7,7 @@ from typing import Any
 from .combo_generator import generate_combos
 from .evaluator import evaluate_combo
 from .scoring import score_evaluations
+from .stake_refiner import refine_top_strategies
 
 
 def optimize(config: dict[str, Any], seed: int | None = None) -> list[dict[str, Any]]:
@@ -24,7 +25,7 @@ def optimize(config: dict[str, Any], seed: int | None = None) -> list[dict[str, 
     scored.sort(key=lambda evaluation: evaluation["score"], reverse=True)
 
     keep_top_n = int(config.get("search", {}).get("keep_top_n", 10))
-    return [
+    ranked = [
         {
             **evaluation,
             "rank": rank,
@@ -32,3 +33,4 @@ def optimize(config: dict[str, Any], seed: int | None = None) -> list[dict[str, 
         }
         for rank, evaluation in enumerate(scored[:keep_top_n], start=1)
     ]
+    return refine_top_strategies(ranked, config, seed=seed)

@@ -110,6 +110,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--output-dir", type=Path, default=Path("outputs"), help="Output directory")
     parser.add_argument("--seed", type=int, default=42, help="Random seed for reproducible runs")
     parser.add_argument("--skip-monte-carlo", action="store_true", help="Only run theoretical optimization exports")
+    parser.add_argument("--disable-refinement", action="store_true", help="Disable local stake refinement")
+    parser.add_argument("--refinement-variants", type=int, help="Override refinement.variants_per_strategy")
     return parser
 
 
@@ -131,6 +133,10 @@ def apply_overrides(config: dict[str, Any], args: argparse.Namespace) -> dict[st
         config.setdefault("monte_carlo", {})["spins_per_session"] = args.spins_per_session
     if args.initial_bankroll is not None:
         config.setdefault("monte_carlo", {})["initial_bankroll"] = args.initial_bankroll
+    if args.disable_refinement:
+        config.setdefault("refinement", {})["enabled"] = False
+    if args.refinement_variants is not None:
+        config.setdefault("refinement", {})["variants_per_strategy"] = args.refinement_variants
     return config
 
 

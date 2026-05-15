@@ -24,6 +24,8 @@ BEST_COMBOS_COLUMNS = [
     "expected_value",
     "big_hit_probability",
     "variance",
+    "optimization_ratio",
+    "refinement_source",
 ]
 
 NUMBER_OUTCOMES_COLUMNS = [
@@ -102,6 +104,8 @@ def export_best_combos(results: list[dict[str, Any]], path: Path) -> None:
                     "expected_value": metrics["expected_value"],
                     "big_hit_probability": metrics["big_hit_probability"],
                     "variance": metrics["variance"],
+                    "optimization_ratio": metrics.get("optimization_ratio"),
+                    "refinement_source": result.get("refinement_source"),
                 }
             )
 

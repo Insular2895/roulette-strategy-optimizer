@@ -23,6 +23,13 @@ stake_strategy:
   allow_repeated_bets: true
   merge_same_bets: true
 
+refinement:
+  enabled: true
+  top_n: 5
+  variants_per_strategy: 500
+  min_stake_per_bet: 0
+  max_stake_per_bet: 25
+
 monte_carlo:
   sessions: 10000
   spins_per_session: 100

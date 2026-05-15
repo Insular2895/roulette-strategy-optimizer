@@ -123,6 +123,13 @@ stake_strategy:
   allow_repeated_bets: true
   merge_same_bets: true
 
+refinement:
+  enabled: true
+  top_n: 5
+  variants_per_strategy: 500
+  min_stake_per_bet: 0
+  max_stake_per_bet: 25
+
 monte_carlo:
   sessions: 10000
   spins_per_session: 100
@@ -179,6 +186,22 @@ Le moteur calcule notamment :
 - score de hit explosif.
 
 Les gros profits doivent etre expliques clairement : superposition de mises, accumulation de payouts, concentration bankroll sur certaines zones, combinaison plein plus cheval plus carre plus douzaine, etc.
+
+## Raffinement Des Montants
+
+Apres le premier classement, le moteur peut raffiner les meilleures strategies.
+
+Le raffinement garde les structures de paris les plus prometteuses, puis genere des variantes de montants afin d'ameliorer le ratio risque/rendement. Le classement final utilise alors `optimization_ratio`, qui combine :
+
+- probabilite de profit ;
+- gain moyen quand la strategie est positive ;
+- probabilite de gros hit ;
+- gain maximum ;
+- volatilite ;
+- perte maximale ;
+- esperance negative.
+
+Le but est de trouver un meilleur compromis entre gros hits, frequence de profit et risque de destruction bankroll, sans pretendre changer l'esperance mathematique de la roulette.
 
 ## Monte Carlo
 
@@ -256,6 +279,7 @@ python3 backend/src/run.py \
   --monte-carlo-sessions 200 \
   --spins-per-session 100 \
   --initial-bankroll 1000 \
+  --refinement-variants 2000 \
   --output-dir outputs
 ```
 
