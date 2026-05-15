@@ -36,6 +36,28 @@ NUMBER_OUTCOMES_COLUMNS = [
     "explanation",
 ]
 
+MONTE_CARLO_RESULTS_COLUMNS = [
+    "combo_id",
+    "sessions",
+    "spins_per_session",
+    "final_bankroll_avg",
+    "final_bankroll_median",
+    "probability_profit",
+    "probability_bust",
+    "avg_max_drawdown",
+    "max_drawdown_seen",
+    "biggest_hit_seen",
+    "avg_hit_frequency",
+    "big_hit_frequency",
+]
+
+MONTE_CARLO_PATHS_COLUMNS = [
+    "combo_id",
+    "session_id",
+    "spin_index",
+    "bankroll",
+]
+
 
 def export_outputs(results: list[dict[str, Any]], output_dir: str | Path = "outputs") -> dict[str, Path]:
     """Export best combos, best combo detail and number outcomes."""
@@ -106,3 +128,25 @@ def export_number_outcomes(results: list[dict[str, Any]], path: Path) -> None:
                         "explanation": outcome["explanation"],
                     }
                 )
+
+
+def export_monte_carlo(simulation: dict[str, list[dict[str, Any]]], output_dir: str | Path = "outputs") -> dict[str, Path]:
+    """Export Monte Carlo aggregate metrics and bankroll paths."""
+    output_path = Path(output_dir)
+    output_path.mkdir(parents=True, exist_ok=True)
+    paths = {
+        "monte_carlo_results": output_path / "monte_carlo_results.csv",
+        "monte_carlo_paths": output_path / "monte_carlo_paths.csv",
+    }
+    write_csv(paths["monte_carlo_results"], MONTE_CARLO_RESULTS_COLUMNS, simulation["results"])
+    write_csv(paths["monte_carlo_paths"], MONTE_CARLO_PATHS_COLUMNS, simulation["paths"])
+    return paths
+
+
+def write_csv(path: Path, columns: list[str], rows: list[dict[str, Any]]) -> None:
+    """Write selected columns to CSV."""
+    with path.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=columns)
+        writer.writeheader()
+        for row in rows:
+            writer.writerow({column: row.get(column) for column in columns})
