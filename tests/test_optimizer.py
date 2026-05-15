@@ -42,6 +42,33 @@ class OptimizerTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             optimize(config)
 
+    def test_robust_balanced_profile_uses_pareto_candidate_pool(self):
+        config = {
+            "bankroll": {"total": 20, "allowed_units": [1, 2, 5], "exact_spend": True},
+            "objective": {"profile": "robust_balanced", "min_coverage": 0.0, "max_coverage": 1.0, "big_hit_threshold": 30},
+            "search": {"method": "hybrid", "combos_to_generate": 16, "keep_top_n": 4},
+            "pareto": {"enabled": True, "candidate_pool_size": 8},
+            "stake_strategy": {"max_stake_per_bet": 5, "merge_same_bets": True},
+            "refinement": {"enabled": False},
+            "profiles": {
+                "robust_balanced": {
+                    "coverage_weight": 0.35,
+                    "profit_probability_weight": 0.30,
+                    "avg_win_weight": 0.15,
+                    "big_hit_weight": 0.10,
+                    "max_profit_weight": 0.05,
+                    "risk_weight": 0.20,
+                    "volatility_weight": 0.20,
+                }
+            },
+        }
+
+        results = optimize(config, seed=6)
+
+        self.assertEqual(len(results), 8)
+        self.assertEqual(results[0]["profile"], "robust_balanced")
+        self.assertIn("volatility", results[0]["score_components"])
+
 
 if __name__ == "__main__":
     unittest.main()

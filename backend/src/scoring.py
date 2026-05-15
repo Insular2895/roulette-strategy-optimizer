@@ -13,6 +13,11 @@ PROFILE_METRIC_MAP = {
     "max_profit_weight": "max_profit",
 }
 
+MINIMIZE_METRIC_MAP = {
+    "volatility_weight": "volatility",
+    "drawdown_weight": "theoretical_drawdown",
+}
+
 
 def score_combo(metrics: dict, weights: dict) -> float:
     """Score a strategy from normalized metrics and profile weights."""
@@ -42,6 +47,12 @@ def score_evaluations(evaluations: list[dict[str, Any]], profile_weights: dict[s
             components[metric_name] = normalized
             score += normalized * weight
 
+        for weight_name, metric_name in MINIMIZE_METRIC_MAP.items():
+            weight = float(profile_weights.get(weight_name, 0.0))
+            normalized = 1.0 - normalize_metric(float(metrics.get(metric_name, 0.0)), ranges[metric_name])
+            components[metric_name] = normalized
+            score += normalized * weight
+
         risk_weight = float(profile_weights.get("risk_weight", 0.0))
         risk_component = 1.0 - normalize_metric(float(metrics.get("theoretical_drawdown", 0.0)), ranges["theoretical_drawdown"])
         components["risk"] = risk_component
@@ -56,7 +67,7 @@ def score_evaluations(evaluations: list[dict[str, Any]], profile_weights: dict[s
 
 def build_metric_ranges(metrics_list: list[dict[str, Any]]) -> dict[str, tuple[float, float]]:
     """Build min/max ranges for every metric used in scoring."""
-    metric_names = set(PROFILE_METRIC_MAP.values()) | {"theoretical_drawdown"}
+    metric_names = set(PROFILE_METRIC_MAP.values()) | set(MINIMIZE_METRIC_MAP.values()) | {"theoretical_drawdown"}
     ranges: dict[str, tuple[float, float]] = {}
     for metric_name in metric_names:
         values = [float(metrics.get(metric_name, 0.0)) for metrics in metrics_list]

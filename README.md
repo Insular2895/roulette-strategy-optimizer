@@ -103,12 +103,12 @@ roulette:
   numbers: 37
 
 bankroll:
-  total: 100
+  total: 50
   allowed_units: [1, 2, 3, 5, 10]
   exact_spend: true
 
 objective:
-  profile: balanced
+  profile: robust_balanced
   min_coverage: 0.45
   max_coverage: 0.85
   big_hit_threshold: 100
@@ -118,6 +118,10 @@ search:
   combos_to_generate: 50000
   keep_top_n: 10
 
+pareto:
+  enabled: true
+  candidate_pool_size: 30
+
 stake_strategy:
   max_stake_per_bet: 10
   allow_repeated_bets: true
@@ -125,7 +129,7 @@ stake_strategy:
 
 refinement:
   enabled: true
-  top_n: 5
+  top_n: 10
   variants_per_strategy: 500
   min_stake_per_bet: 0
   max_stake_per_bet: 25
@@ -137,9 +141,9 @@ monte_carlo:
 
 robust_filter:
   enabled: true
-  max_probability_bust: 0.65
-  max_avg_drawdown: 1400
-  max_drawdown_seen: 3200
+  max_probability_bust: 0.50
+  max_avg_drawdown: 1200
+  max_drawdown_seen: 2800
   min_probability_profit: 0.30
 ```
 
@@ -237,8 +241,10 @@ Quand Monte Carlo est active, le classement final est reranke avec `robust_score
 Le `robust_score` favorise :
 
 - la retention moyenne de bankroll ;
+- la mediane de bankroll finale ;
 - la probabilite de finir positif ;
 - la frequence des gros hits ;
+- la couverture theorique ;
 - le ratio theorique optimise.
 
 Il penalise :
@@ -291,13 +297,15 @@ Backend :
 
 ```bash
 pip install -r requirements.txt
-python3 backend/src/run.py --profile balanced --bankroll 100 --units 1,2,3,5,10
+python3 backend/src/run.py --profile robust_balanced --bankroll 50 --units 1,2,3,5,10
 ```
 
 Run rapide pour generer des fichiers consultables sans serveur web :
 
 ```bash
 python3 backend/src/run.py \
+  --profile robust_balanced \
+  --bankroll 50 \
   --combos-to-generate 200 \
   --keep-top-n 5 \
   --monte-carlo-sessions 200 \

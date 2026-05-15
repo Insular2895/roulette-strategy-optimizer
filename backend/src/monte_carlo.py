@@ -94,20 +94,34 @@ def evaluate_robust_filter(result: dict[str, Any], robust_filter: dict[str, Any]
 
 def calculate_robust_score(result: dict[str, Any], metrics: dict[str, Any]) -> float:
     """Score a strategy by Monte Carlo resilience and theoretical upside."""
+    initial_bankroll = float(result.get("initial_bankroll", 0.0))
     final_bankroll_avg = float(result.get("final_bankroll_avg", 0.0))
-    sessions = float(result.get("sessions", 1.0)) or 1.0
-    spins = float(result.get("spins_per_session", 1.0)) or 1.0
-    expected_start = final_bankroll_avg - float(metrics.get("expected_value", 0.0)) * spins
+    if initial_bankroll <= 0:
+        spins = float(result.get("spins_per_session", 1.0)) or 1.0
+        initial_bankroll = final_bankroll_avg - float(metrics.get("expected_value", 0.0)) * spins
 
-    bankroll_retention = final_bankroll_avg / (expected_start or 1.0)
-    profit_component = float(result.get("probability_profit", 0.0)) * 2.0
-    hit_component = float(result.get("big_hit_frequency", 0.0)) * 1.2
-    bust_penalty = float(result.get("probability_bust", 0.0)) * 2.5
-    drawdown_penalty = float(result.get("avg_max_drawdown", 0.0)) / (expected_start or 1.0)
-    worst_drawdown_penalty = float(result.get("max_drawdown_seen", 0.0)) / ((expected_start or 1.0) * max(sessions**0.5, 1.0))
-    theory_component = float(metrics.get("optimization_ratio", metrics.get("risk_reward_score", 0.0))) * 0.25
+    bankroll_retention = final_bankroll_avg / (initial_bankroll or 1.0)
+    median_retention = float(result.get("final_bankroll_median", 0.0)) / (initial_bankroll or 1.0)
+    profit_component = float(result.get("probability_profit", 0.0)) * 3.0
+    hit_component = float(result.get("big_hit_frequency", 0.0)) * 0.9
+    coverage_component = float(metrics.get("coverage_probability", 0.0)) * 0.8
+    theory_component = float(metrics.get("optimization_ratio", metrics.get("risk_reward_score", 0.0))) * 0.15
 
-    return bankroll_retention + profit_component + hit_component + theory_component - bust_penalty - drawdown_penalty - worst_drawdown_penalty
+    bust_penalty = float(result.get("probability_bust", 0.0)) * 4.0
+    drawdown_penalty = float(result.get("avg_max_drawdown", 0.0)) / (initial_bankroll or 1.0) * 1.35
+    worst_drawdown_penalty = float(result.get("max_drawdown_seen", 0.0)) / (initial_bankroll or 1.0) * 0.35
+
+    return (
+        bankroll_retention
+        + median_retention
+        + profit_component
+        + hit_component
+        + coverage_component
+        + theory_component
+        - bust_penalty
+        - drawdown_penalty
+        - worst_drawdown_penalty
+    )
 
 
 def simulate_strategy(
@@ -177,6 +191,7 @@ def simulate_strategy(
         "combo_id": strategy["combo_id"],
         "sessions": sessions,
         "spins_per_session": spins_per_session,
+        "initial_bankroll": initial_bankroll,
         "final_bankroll_avg": mean(final_bankrolls) if final_bankrolls else 0.0,
         "final_bankroll_median": median(final_bankrolls) if final_bankrolls else 0.0,
         "probability_profit": profitable_sessions / sessions if sessions else 0.0,

@@ -30,6 +30,7 @@ BEST_COMBOS_COLUMNS = [
     "mc_probability_profit",
     "mc_probability_bust",
     "mc_avg_max_drawdown",
+    "mc_final_bankroll_median",
     "robust_filter_pass",
     "robust_filter_reasons",
 ]
@@ -50,6 +51,7 @@ MONTE_CARLO_RESULTS_COLUMNS = [
     "combo_id",
     "sessions",
     "spins_per_session",
+    "initial_bankroll",
     "final_bankroll_avg",
     "final_bankroll_median",
     "probability_profit",
@@ -116,6 +118,7 @@ def export_best_combos(results: list[dict[str, Any]], path: Path) -> None:
                     "mc_probability_profit": result.get("monte_carlo", {}).get("probability_profit"),
                     "mc_probability_bust": result.get("monte_carlo", {}).get("probability_bust"),
                     "mc_avg_max_drawdown": result.get("monte_carlo", {}).get("avg_max_drawdown"),
+                    "mc_final_bankroll_median": result.get("monte_carlo", {}).get("final_bankroll_median"),
                     "robust_filter_pass": result.get("monte_carlo", {}).get("robust_filter_pass"),
                     "robust_filter_reasons": "; ".join(result.get("monte_carlo", {}).get("robust_filter_reasons", [])),
                 }
@@ -273,6 +276,16 @@ def export_roulette_board_html(result: dict[str, Any] | None, path: Path) -> Non
         for index, bet in enumerate(result["bets"], start=1)
     )
     metrics = result["metrics"]
+    monte_carlo = result.get("monte_carlo", {})
+    monte_carlo_cards = ""
+    if monte_carlo:
+        monte_carlo_cards = f"""
+      {metric_card('MC profit', percent(monte_carlo['probability_profit']))}
+      {metric_card('MC bust', percent(monte_carlo['probability_bust']))}
+      {metric_card('MC median', monte_carlo['final_bankroll_median'])}
+      {metric_card('Avg drawdown', round(float(monte_carlo['avg_max_drawdown']), 2))}
+      {metric_card('Robust filter', 'PASS' if monte_carlo.get('robust_filter_pass') else 'FAIL')}
+        """
 
     path.write_text(
         f"""<!doctype html>
@@ -287,7 +300,7 @@ def export_roulette_board_html(result: dict[str, Any] | None, path: Path) -> Non
     h1 {{ margin: 0 0 8px; font-size: 34px; }}
     h2 {{ margin: 28px 0 12px; font-size: 24px; }}
     .hint {{ color: #cbd5e1; margin: 0 0 18px; }}
-    .summary {{ display: grid; grid-template-columns: repeat(5, minmax(120px, 1fr)); gap: 10px; margin: 20px 0; }}
+    .summary {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 20px 0; }}
     .metric {{ background: #151a1f; border: 1px solid #27313b; border-radius: 8px; padding: 14px; }}
     .metric span {{ color: #94a3b8; display: block; font-size: 12px; }}
     .metric strong {{ font-size: 22px; display: block; margin-top: 8px; }}
@@ -320,6 +333,7 @@ def export_roulette_board_html(result: dict[str, Any] | None, path: Path) -> Non
       {metric_card('Coverage', percent(metrics['coverage_probability']))}
       {metric_card('Profit probability', percent(metrics['profit_probability']))}
       {metric_card('Max profit', metrics['max_profit'])}
+      {monte_carlo_cards}
     </div>
 
     <h2>Plan de pose des jetons</h2>
