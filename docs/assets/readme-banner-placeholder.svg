@@ -17,7 +17,7 @@
     <path d="M0 100H1600M0 200H1600M0 300H1600M0 400H1600"/>
     <path d="M100 0V500M200 0V500M300 0V500M400 0V500M500 0V500M600 0V500M700 0V500M800 0V500M900 0V500M1000 0V500M1100 0V500M1200 0V500M1300 0V500M1400 0V500M1500 0V500"/>
   </g>
-  <g transform="translate(100 90)">
+  <g transform="translate(80 100) scale(0.9)">
     <rect x="0" y="0" width="560" height="300" rx="8" fill="#0f5132" stroke="#d7dde4" stroke-width="3"/>
     <rect x="18" y="18" width="80" height="264" fill="#123d2b" stroke="#d7dde4" stroke-width="2"/>
     <text x="58" y="160" text-anchor="middle" font-family="Arial, sans-serif" font-size="48" fill="#d7dde4">0</text>
@@ -46,14 +46,14 @@
     <circle cx="305" cy="141" r="46" fill="#2dd4bf" opacity="0.34"/>
   </g>
   <g fill="none" stroke-linecap="round" opacity="0.78">
-    <path d="M760 350C845 300 920 370 990 310S1120 170 1210 230 1360 390 1500 210" stroke="#2dd4bf" stroke-width="5"/>
-    <path d="M760 285C855 260 910 245 975 265S1100 335 1195 285 1320 160 1500 190" stroke="#f2d16b" stroke-width="5"/>
-    <path d="M760 400C880 410 940 330 1010 350S1140 430 1225 360 1345 285 1500 315" stroke="#a78bfa" stroke-width="4"/>
+    <path d="M690 350C790 300 880 370 960 310S1090 170 1180 230 1330 390 1460 210" stroke="#2dd4bf" stroke-width="5"/>
+    <path d="M690 285C810 260 890 245 955 265S1080 335 1175 285 1300 160 1460 190" stroke="#f2d16b" stroke-width="5"/>
+    <path d="M690 400C830 410 920 330 990 350S1120 430 1205 360 1325 285 1460 315" stroke="#a78bfa" stroke-width="4"/>
   </g>
-  <text x="760" y="135" font-family="Arial, sans-serif" font-size="58" font-weight="800" fill="#ffffff">Roulette Strategy</text>
-  <text x="760" y="198" font-family="Arial, sans-serif" font-size="58" font-weight="800" fill="#ffffff">Optimizer</text>
-  <text x="764" y="242" font-family="Arial, sans-serif" font-size="24" fill="#d7dde4">Grid search, scoring theorique et Monte Carlo</text>
-  <text x="764" y="274" font-family="Arial, sans-serif" font-size="24" fill="#d7dde4">pour visualiser des strategies roulette</text>
-  <rect x="764" y="308" width="315" height="42" rx="6" fill="url(#gold)"/>
-  <text x="922" y="337" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#141414">European Roulette Analytics</text>
+  <text x="690" y="138" font-family="Arial, sans-serif" font-size="50" font-weight="800" fill="#ffffff">Roulette Strategy</text>
+  <text x="690" y="194" font-family="Arial, sans-serif" font-size="50" font-weight="800" fill="#ffffff">Optimizer</text>
+  <text x="694" y="238" font-family="Arial, sans-serif" font-size="22" fill="#d7dde4">Grid search, scoring theorique et Monte Carlo</text>
+  <text x="694" y="268" font-family="Arial, sans-serif" font-size="22" fill="#d7dde4">pour visualiser des strategies roulette</text>
+  <rect x="694" y="306" width="305" height="42" rx="6" fill="url(#gold)"/>
+  <text x="846" y="335" text-anchor="middle" font-family="Arial, sans-serif" font-size="19" font-weight="700" fill="#141414">European Roulette Analytics</text>
 </svg>
