@@ -9,7 +9,7 @@
   <img alt="React frontend animated logo" src="docs/assets/logo-react-animated.svg" height="28">
   <img alt="Plotly HTML animated logo" src="docs/assets/logo-plotly-animated.svg" height="28">
   <img alt="Monte Carlo paths animated logo" src="docs/assets/logo-monte-carlo-animated.svg" height="28">
-  <img alt="Project status animated logo" src="docs/assets/logo-status-animated.svg" height="28">
+  <img alt="Project status animated logo" src="docs/assets/logo-status-animated.svg" height="27">
 </p>
 
 ## Objectif
