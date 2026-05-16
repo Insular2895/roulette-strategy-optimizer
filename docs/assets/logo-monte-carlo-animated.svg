@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="170" height="28" viewBox="0 0 170 28" role="img" aria-labelledby="title desc">
+  <title id="title">Monte Carlo animated badge</title>
+  <desc id="desc">Animated local README badge for Monte Carlo paths.</desc>
+  <defs>
+    <linearGradient id="badgeBg" x1="0" x2="1">
+      <stop offset="0%" stop-color="#20252e"/>
+      <stop offset="100%" stop-color="#303957"/>
+    </linearGradient>
+    <clipPath id="chartClip">
+      <rect x="9" y="6" width="24" height="16" rx="2"/>
+    </clipPath>
+  </defs>
+  <rect width="170" height="28" rx="6" fill="url(#badgeBg)"/>
+  <rect x="0.5" y="0.5" width="169" height="27" rx="5.5" fill="none" stroke="#ffffff" stroke-opacity="0.16"/>
+  <g clip-path="url(#chartClip)" fill="none" stroke-linecap="round" stroke-width="1.6">
+    <path d="M8 19 C14 9 19 23 25 12 S35 14 39 7" stroke="#2dd4bf" opacity="0.95">
+      <animateTransform attributeName="transform" type="translate" values="-6 0;2 0;-6 0" dur="3.2s" repeatCount="indefinite"/>
+    </path>
+    <path d="M7 14 C13 17 18 5 24 11 S35 21 40 10" stroke="#f2c94c" opacity="0.8">
+      <animateTransform attributeName="transform" type="translate" values="0 0;-5 0;0 0" dur="3.6s" repeatCount="indefinite"/>
+    </path>
+    <path d="M7 20 C14 18 18 16 25 18 S33 8 40 13" stroke="#a78bfa" opacity="0.8">
+      <animateTransform attributeName="transform" type="translate" values="-3 0;3 0;-3 0" dur="4s" repeatCount="indefinite"/>
+    </path>
+  </g>
+  <rect x="9" y="6" width="24" height="16" rx="2" fill="none" stroke="#ffffff" stroke-opacity="0.22"/>
+  <text x="42" y="18" font-family="Inter,Arial,sans-serif" font-size="12" font-weight="700" fill="#ffffff">Monte Carlo</text>
+  <text x="121" y="18" font-family="Inter,Arial,sans-serif" font-size="12" fill="#dfe6ff">paths</text>
+</svg>

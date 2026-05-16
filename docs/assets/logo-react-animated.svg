@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="146" height="28" viewBox="0 0 146 28" role="img" aria-labelledby="title desc">
+  <title id="title">React frontend animated badge</title>
+  <desc id="desc">Animated local README badge for the React frontend.</desc>
+  <defs>
+    <linearGradient id="badgeBg" x1="0" x2="1">
+      <stop offset="0%" stop-color="#20252e"/>
+      <stop offset="100%" stop-color="#193d49"/>
+    </linearGradient>
+  </defs>
+  <rect width="146" height="28" rx="6" fill="url(#badgeBg)"/>
+  <rect x="0.5" y="0.5" width="145" height="27" rx="5.5" fill="none" stroke="#ffffff" stroke-opacity="0.16"/>
+  <g transform="translate(18 14)" fill="none" stroke="#61dafb" stroke-width="1.5">
+    <g>
+      <ellipse rx="11" ry="4"/>
+      <ellipse rx="11" ry="4" transform="rotate(60)"/>
+      <ellipse rx="11" ry="4" transform="rotate(120)"/>
+      <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="7s" repeatCount="indefinite"/>
+    </g>
+    <circle r="2.4" fill="#61dafb" stroke="none">
+      <animate attributeName="r" values="2.2;3;2.2" dur="1.6s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+  <text x="38" y="18" font-family="Inter,Arial,sans-serif" font-size="12" font-weight="700" fill="#ffffff">React</text>
+  <text x="80" y="18" font-family="Inter,Arial,sans-serif" font-size="12" fill="#9ff3ff">frontend</text>
+</svg>

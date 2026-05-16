@@ -5,10 +5,11 @@
 </p>
 
 <p align="center">
-  <img alt="Python" src="https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=white">
-  <img alt="React" src="https://img.shields.io/badge/React-frontend-61DAFB?logo=react&logoColor=111111">
-  <img alt="Plotly" src="https://img.shields.io/badge/Plotly-Monte%20Carlo-3F4F75?logo=plotly&logoColor=white">
-  <img alt="Status" src="https://img.shields.io/badge/status-V1%20planning-F2C94C">
+  <img alt="Python 3.11+ animated logo" src="docs/assets/logo-python-animated.svg" height="28">
+  <img alt="React frontend animated logo" src="docs/assets/logo-react-animated.svg" height="28">
+  <img alt="Plotly HTML animated logo" src="docs/assets/logo-plotly-animated.svg" height="28">
+  <img alt="Monte Carlo paths animated logo" src="docs/assets/logo-monte-carlo-animated.svg" height="28">
+  <img alt="Project status animated logo" src="docs/assets/logo-status-animated.svg" height="28">
 </p>
 
 ## Objectif
