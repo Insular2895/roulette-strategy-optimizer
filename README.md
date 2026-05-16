@@ -64,7 +64,7 @@ Lecture importante : le montage trouve produit des hits capables de rembourser p
 La heatmap ci-dessous reprend les gains nets de `outputs/number_outcomes.csv`. Chaque case montre ce que la strategie gagne ou perd si ce numero sort.
 
 <p align="center">
-  <img alt="Heatmap animee du meilleur resultat obtenu" src="docs/assets/heatmap-result-animated.svg" width="100%">
+  <img alt="Capture PNG du tapis roulette et de la heatmap du meilleur resultat obtenu" src="docs/assets/roulette-board-html.png" width="100%">
 </p>
 
 Le point fort du run est le numero `14`, avec un net `+919`. Ce hit vient de la superposition :
@@ -76,10 +76,10 @@ Le point fort du run est le numero `14`, avec un net `+919`. Ce hit vient de la 
 
 ## Monte Carlo Du Resultat
 
-La vue suivante resume la validation Monte Carlo du meme run. Les courbes exactes sont exportees dans `outputs/monte_carlo_paths.html`; le SVG ci-dessous sert de resume anime dans le README.
+La vue suivante resume la validation Monte Carlo du meme run. Les courbes exactes sont exportees dans `outputs/monte_carlo_paths.html`; le PNG ci-dessous reprend l'ancienne capture du rendu HTML.
 
 <p align="center">
-  <img alt="Resume Monte Carlo anime du meilleur resultat obtenu" src="docs/assets/monte-carlo-result-animated.svg" width="100%">
+  <img alt="Capture PNG des trajectoires Monte Carlo du meilleur resultat obtenu" src="docs/assets/monte-carlo-html.png" width="100%">
 </p>
 
 ## Comment Fonctionne Le Grid Search
