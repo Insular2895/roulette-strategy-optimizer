@@ -35,27 +35,27 @@ python3 backend/src/run.py \
   --monte-carlo-sessions 1000 \
   --spins-per-session 100 \
   --initial-bankroll 1000 \
-  --refinement-variants 5000 \
+  --refinement-variants 3000 \
   --seed 42 \
   --output-dir outputs
 ```
 
-Strategie gagnante du batch : `random_926_refined_4671`.
+Strategie gagnante du batch : `random_743_refined_2584`.
 
 | Metrique | Valeur |
 | --- | ---: |
 | Mise totale | `100` |
-| Couverture theorique | `67.57%` |
-| Probabilite theorique de profit | `32.43%` |
-| Gain moyen si positif | `192` |
-| Meilleur hit | `+919` |
+| Couverture theorique | `64.86%` |
+| Probabilite theorique de profit | `29.73%` |
+| Gain moyen si positif | `207.64` |
+| Meilleur hit | `+1007` |
 | Pire resultat | `-100` |
 | Esperance theorique par spin | `-2.70` |
-| Loss buffer ratio | `2.00` |
-| Max loss cover | `9.19` |
-| Monte Carlo profit probability | `30.6%` |
-| Monte Carlo bust probability | `63.8%` |
-| Bankroll mediane finale Monte Carlo | `82` |
+| Loss buffer ratio | `2.26` |
+| Max loss cover | `10.07` |
+| Monte Carlo profit probability | `30.0%` |
+| Monte Carlo bust probability | `65.2%` |
+| Bankroll mediane finale Monte Carlo | `81` |
 
 Lecture importante : le montage trouve produit des hits capables de rembourser plusieurs pertes, mais il ne transforme pas la roulette en systeme gagnant long terme. Le Monte Carlo montre encore une probabilite de bust elevee sur 100 spins.
 
@@ -64,19 +64,22 @@ Lecture importante : le montage trouve produit des hits capables de rembourser p
 La heatmap ci-dessous reprend les gains nets de `outputs/number_outcomes.csv`. Chaque case montre ce que la strategie gagne ou perd si ce numero sort.
 
 <p align="center">
-  <img alt="Capture PNG du tapis roulette et de la heatmap du meilleur resultat obtenu" src="docs/assets/roulette-board-html.png" width="100%">
+  <img alt="Capture PNG du plan de pose des jetons du meilleur resultat obtenu" src="docs/assets/roulette-board-html.png" width="100%">
 </p>
 
-Le point fort du run est le numero `14`, avec un net `+919`. Ce hit vient de la superposition :
+<p align="center">
+  <img alt="Capture PNG de la heatmap du meilleur resultat obtenu" src="docs/assets/roulette-heatmap-html.png" width="100%">
+</p>
 
-- `25` sur le carre `11-12-14-15` ;
-- `17` en plein sur `14` ;
-- `10` sur le cheval `14-17` ;
-- `1` sur la chance simple pair.
+Le point fort du run est le numero `32`, avec un net `+1007`. Ce hit vient de la superposition :
+
+- `24` en plein sur `32` ;
+- `25` sur le carre `28-29-31-32` ;
+- `1` sur le cheval `29-32`.
 
 ## Monte Carlo Du Resultat
 
-La vue suivante resume la validation Monte Carlo du meme run. Les courbes exactes sont exportees dans `outputs/monte_carlo_paths.html`; le PNG ci-dessous reprend l'ancienne capture du rendu HTML.
+La vue suivante resume la validation Monte Carlo du meme run. Les courbes exactes sont exportees dans `outputs/monte_carlo_paths.html`; le PNG ci-dessous reprend la capture actuelle du rendu HTML.
 
 <p align="center">
   <img alt="Capture PNG des trajectoires Monte Carlo du meilleur resultat obtenu" src="docs/assets/monte-carlo-html.png" width="100%">
@@ -218,7 +221,7 @@ python3 backend/src/run.py \
   --monte-carlo-sessions 1000 \
   --spins-per-session 100 \
   --initial-bankroll 1000 \
-  --refinement-variants 5000 \
+  --refinement-variants 3000 \
   --seed 42 \
   --output-dir outputs
 ```
