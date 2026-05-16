@@ -14,89 +14,106 @@
 
 ## Objectif
 
-Roulette Strategy Optimizer est un moteur quantitatif de recherche de strategies pour roulette europeenne.
+Roulette Strategy Optimizer est un moteur quantitatif pour chercher, scorer et visualiser des strategies de roulette europeenne.
 
-Le projet vise a generer automatiquement des milliers de structures de paris, evaluer leur comportement theorique, valider les meilleures strategies avec des simulations Monte Carlo, puis visualiser les resultats sur un tapis roulette et des graphiques de trajectoires bankroll.
+Le coeur du projet repose sur un vrai pipeline de recherche :
 
-Le systeme ne cherche pas a battre mathematiquement la roulette. L'esperance reste negative a cause du 0, de la variance et de l'avantage structurel du casino. L'objectif est analytique : optimiser le comportement d'une session, identifier les profils de risque les plus efficaces, maximiser les probabilites de hits interessants et ralentir la destruction de bankroll.
+`Grid Search` -> `Random Search` -> `raffinement des montants` -> `evaluation theorique` -> `validation Monte Carlo` -> `exports CSV / JSON / HTML`.
 
-## Apercu Des Visualisations
+Le but n'est pas de battre mathematiquement la roulette. L'esperance reste negative a cause du `0` et de l'avantage casino. Le projet sert a analyser des profils de session : couverture, gros hits, drawdown, vitesse de destruction bankroll et capacite d'un hit a absorber plusieurs pertes.
 
-<p align="center">
-  <img alt="Capture du plan de pose des jetons genere par roulette_board.html" src="docs/assets/roulette-board-html.png" width="49%">
-  <img alt="Capture des trajectoires Monte Carlo generees par monte_carlo_paths.html" src="docs/assets/monte-carlo-html.png" width="49%">
-</p>
+## Resultat Obtenu
 
-Le backend genere ces vues sous forme de fichiers HTML ouvrables directement :
+Dernier run local de reference :
 
-- `outputs/report.html` : index de toutes les sorties generees ;
-- `outputs/roulette_board.html` : tapis roulette avec gains nets par numero ;
-- `outputs/monte_carlo_paths.html` : trajectoires bankroll par session ;
-- `outputs/monte_carlo_summary.html` : distribution et drawdown ;
-- `outputs/monte_carlo_comparison.html` : comparaison des meilleures strategies.
-
-## Ce Que Le Moteur Doit Faire
-
-- Prendre une bankroll fixe, par exemple `100`.
-- Autoriser plusieurs tailles de mises, par exemple `1`, `2`, `3`, `5`, `10`.
-- Generer automatiquement des milliers de combinaisons de mises.
-- Supporter les paris roulette europeenne : plein, cheval, transversale, carre, sixain, douzaine, colonne et chances simples.
-- Evaluer chaque strategie sur les 37 resultats possibles, de `0` a `36`.
-- Calculer les metriques de couverture, profit, variance, drawdown, gros hits et esperance.
-- Expliquer les profits via les superpositions de mises.
-- Conserver les meilleures strategies selon un profil d'optimisation.
-- Valider les meilleures strategies via Monte Carlo.
-- Exporter les resultats en `CSV`, `JSON` et `HTML`.
-- Afficher visuellement le tapis roulette, les mises, les zones couvertes et les trajectoires Monte Carlo.
-
-## Architecture Prevue
-
-```text
-roulette-strategy-optimizer/
-  README.md
-  requirements.txt
-  config.yaml
-
-  backend/
-    src/
-      roulette_board.py
-      bet_types.py
-      combo_generator.py
-      evaluator.py
-      optimizer.py
-      monte_carlo.py
-      scoring.py
-      visual_export.py
-      run.py
-
-  frontend/
-    package.json
-    src/
-      App.jsx
-      RouletteBoard.jsx
-      RouletteWheel.jsx
-      BetOverlay.jsx
-      StrategySummary.jsx
-      MonteCarloChart.jsx
-      MonteCarloSummary.jsx
-      NumberTooltip.jsx
-      data/
-        best_combo_detail.json
-
-  outputs/
-    best_combos.csv
-    best_combo_detail.json
-    number_outcomes.csv
-    monte_carlo_results.csv
-    monte_carlo_paths.csv
-    monte_carlo_paths.html
-    monte_carlo_summary.html
-    monte_carlo_comparison.html
+```bash
+python3 backend/src/run.py \
+  --profile recovery_hits \
+  --bankroll 100 \
+  --combos-to-generate 1000 \
+  --keep-top-n 10 \
+  --monte-carlo-sessions 1000 \
+  --spins-per-session 100 \
+  --initial-bankroll 1000 \
+  --refinement-variants 5000 \
+  --seed 42 \
+  --output-dir outputs
 ```
 
-## Configuration Cible
+Strategie gagnante du batch : `random_926_refined_4671`.
 
-Tous les parametres doivent rester modifiables facilement dans `config.yaml`.
+| Metrique | Valeur |
+| --- | ---: |
+| Mise totale | `100` |
+| Couverture theorique | `67.57%` |
+| Probabilite theorique de profit | `32.43%` |
+| Gain moyen si positif | `192` |
+| Meilleur hit | `+919` |
+| Pire resultat | `-100` |
+| Esperance theorique par spin | `-2.70` |
+| Loss buffer ratio | `2.00` |
+| Max loss cover | `9.19` |
+| Monte Carlo profit probability | `30.6%` |
+| Monte Carlo bust probability | `63.8%` |
+| Bankroll mediane finale Monte Carlo | `82` |
+
+Lecture importante : le montage trouve produit des hits capables de rembourser plusieurs pertes, mais il ne transforme pas la roulette en systeme gagnant long terme. Le Monte Carlo montre encore une probabilite de bust elevee sur 100 spins.
+
+## Heatmap Du Resultat
+
+La heatmap ci-dessous reprend les gains nets de `outputs/number_outcomes.csv`. Chaque case montre ce que la strategie gagne ou perd si ce numero sort.
+
+<p align="center">
+  <img alt="Heatmap animee du meilleur resultat obtenu" src="docs/assets/heatmap-result-animated.svg" width="100%">
+</p>
+
+Le point fort du run est le numero `14`, avec un net `+919`. Ce hit vient de la superposition :
+
+- `25` sur le carre `11-12-14-15` ;
+- `17` en plein sur `14` ;
+- `10` sur le cheval `14-17` ;
+- `1` sur la chance simple pair.
+
+## Monte Carlo Du Resultat
+
+La vue suivante resume la validation Monte Carlo du meme run. Les courbes exactes sont exportees dans `outputs/monte_carlo_paths.html`; le SVG ci-dessous sert de resume anime dans le README.
+
+<p align="center">
+  <img alt="Resume Monte Carlo anime du meilleur resultat obtenu" src="docs/assets/monte-carlo-result-animated.svg" width="100%">
+</p>
+
+## Comment Fonctionne Le Grid Search
+
+Le `Grid Search` explore methodiquement des structures de paris a partir de contraintes configurables :
+
+- bankroll totale ;
+- tailles de mises autorisees ;
+- nombre de pleins, chevaux, transversales, carres, douzaines, colonnes et chances simples ;
+- niveaux de couverture ;
+- concentration de mise ;
+- superposition des zones ;
+- budget maximum par pari.
+
+Objectif du `Grid Search` : parcourir les structures previsibles et comparer leurs metriques sur les 37 resultats possibles.
+
+Le `Random Search` complete ce travail en generant des combinaisons moins evidentes. Il permet de trouver des superpositions que le `Grid Search` strict peut manquer.
+
+Le mode hybride garde les meilleurs candidats, raffine les montants, puis relance un scoring plus exigeant.
+
+## Pipeline Quantitatif
+
+1. Generation des combinaisons avec `Grid Search`, `Random Search` ou recherche hybride.
+2. Evaluation theorique sur tous les numeros de `0` a `36`.
+3. Calcul des metriques : couverture, profit, gros hits, variance, volatilite, drawdown, esperance.
+4. Scoring selon un profil : `safe`, `balanced`, `aggressive`, `robust_balanced` ou `recovery_hits`.
+5. Raffinement des montants pour ameliorer le compromis hit / perte / drawdown.
+6. Validation Monte Carlo sur des sessions aleatoires.
+7. Export en `CSV`, `JSON` et `HTML`.
+8. Visualisation du tapis, de la heatmap, du plan de pose des jetons et des trajectoires bankroll.
+
+## Configuration
+
+Tous les parametres principaux se modifient dans `config.yaml`.
 
 ```yaml
 roulette:
@@ -119,15 +136,6 @@ search:
   combos_to_generate: 50000
   keep_top_n: 10
 
-pareto:
-  enabled: true
-  candidate_pool_size: 30
-
-stake_strategy:
-  max_stake_per_bet: 10
-  allow_repeated_bets: true
-  merge_same_bets: true
-
 refinement:
   enabled: true
   top_n: 10
@@ -139,18 +147,11 @@ monte_carlo:
   sessions: 10000
   spins_per_session: 100
   initial_bankroll: 1000
-
-robust_filter:
-  enabled: true
-  max_probability_bust: 0.68
-  max_avg_drawdown: 1450
-  max_drawdown_seen: 3600
-  min_probability_profit: 0.30
 ```
 
-## Mises Supportees
+## Types De Mises
 
-| Type | Nom anglais | Numeros couverts | Payout |
+| Type | Nom interne | Numeros couverts | Payout |
 | --- | --- | ---: | ---: |
 | Plein | `straight` | 1 | 35 |
 | Cheval | `split` | 2 | 17 |
@@ -161,7 +162,7 @@ robust_filter:
 | Colonne | `column` | 12 | 2 |
 | Chance simple | `even_money` | 18 | 1 |
 
-Format cible d'une mise :
+Format d'une mise :
 
 ```json
 {
@@ -173,162 +174,61 @@ Format cible d'une mise :
 }
 ```
 
-## Evaluation Theorique
-
-Chaque strategie est testee sur tous les resultats roulette europeenne.
-
-```text
-gain_brut = somme des mises gagnantes * (payout + 1)
-gain_net = gain_brut - total_mise
-```
-
-Le moteur calcule notamment :
-
-- couverture reelle ;
-- probabilite de toucher ;
-- probabilite de profit ;
-- gain net par numero ;
-- gain maximum et perte maximum ;
-- gain moyen si gagnant ;
-- frequence des gros hits ;
-- variance et volatilite ;
-- drawdown theorique ;
-- esperance mathematique ;
-- score risque/rendement ;
-- score de hit explosif.
-
-Les gros profits doivent etre expliques clairement : superposition de mises, accumulation de payouts, concentration bankroll sur certaines zones, combinaison plein plus cheval plus carre plus douzaine, etc.
-
-## Raffinement Des Montants
-
-Apres le premier classement, le moteur peut raffiner les meilleures strategies.
-
-Le raffinement garde les structures de paris les plus prometteuses, puis genere des variantes de montants afin d'ameliorer le ratio risque/rendement. Le classement final utilise alors `optimization_ratio`, qui combine :
-
-- probabilite de profit ;
-- gain moyen quand la strategie est positive ;
-- probabilite de gros hit ;
-- gain maximum ;
-- volatilite ;
-- perte maximale ;
-- esperance negative.
-
-Le but est de trouver un meilleur compromis entre gros hits, frequence de profit et risque de destruction bankroll, sans pretendre changer l'esperance mathematique de la roulette.
-
-Le profil `recovery_hits` ajoute une contrainte pratique : les hits doivent couvrir plusieurs pertes. Il favorise donc :
-
-- `loss_buffer_ratio` : gain moyen positif / perte moyenne ;
-- `max_loss_cover` : nombre de mises completes couvertes par le meilleur hit ;
-- les superpositions capables de rembourser une serie courte de pertes.
-
-Ce profil ne rend pas la roulette gagnante sur le long terme mathematique, mais il cherche une distribution plus adaptee aux sessions ou quelques hits doivent absorber les pertes.
-
-## Monte Carlo
-
-Les meilleures strategies sont validees par simulations aleatoires.
-
-Chaque session contient :
-
-- une bankroll initiale ;
-- un nombre de spins configurable ;
-- une evolution spin par spin ;
-- des gains et pertes successifs.
-
-Le Monte Carlo mesure :
-
-- frequence reelle des gains et pertes ;
-- probabilite de finir positif ;
-- probabilite de ruine ;
-- drawdown moyen et maximal ;
-- survivabilite bankroll ;
-- frequence des gros hits ;
-- volatilite reelle ;
-- comportement long run.
-
-Quand Monte Carlo est active, le classement final est reranke avec `robust_score`. La strategie affichee dans `outputs/roulette_board.html` correspond donc a la meilleure strategie apres validation Monte Carlo du batch courant.
-
-Le `robust_score` favorise :
-
-- la retention moyenne de bankroll ;
-- la mediane de bankroll finale ;
-- la probabilite de finir positif ;
-- la frequence des gros hits ;
-- la couverture theorique ;
-- le ratio theorique optimise.
-- la capacite d'un hit a rembourser plusieurs pertes.
-
-Il penalise :
-
-- la probabilite de ruine ;
-- le drawdown moyen ;
-- le pire drawdown observe.
-
-Le filtre robuste peut aussi rejeter directement les strategies trop dangereuses avant le classement final, selon `robust_filter`.
-
 ## Outputs
 
 | Fichier | Role |
 | --- | --- |
+| `outputs/report.html` | Index local des visualisations generees. |
+| `outputs/roulette_board.html` | Tapis roulette, plan de pose des jetons et heatmap. |
 | `outputs/best_combos.csv` | Classement des meilleures strategies. |
-| `outputs/best_combo_detail.json` | Detail complet d'une strategie retenue. |
-| `outputs/number_outcomes.csv` | Resultat detaille par numero. |
+| `outputs/best_combo_detail.json` | Detail complet de la meilleure strategie. |
+| `outputs/number_outcomes.csv` | Resultat detaille numero par numero. |
 | `outputs/monte_carlo_results.csv` | Metriques Monte Carlo agregees. |
 | `outputs/monte_carlo_paths.csv` | Trajectoires bankroll completes. |
-| `outputs/monte_carlo_paths.html` | Courbes Monte Carlo individuelles et moyenne. |
-| `outputs/monte_carlo_summary.html` | Distribution des bankrolls finales et resume global. |
+| `outputs/monte_carlo_paths.html` | Courbes Monte Carlo individuelles, moyenne et mediane. |
+| `outputs/monte_carlo_summary.html` | Distribution des bankrolls finales et drawdown. |
 | `outputs/monte_carlo_comparison.html` | Comparaison des meilleures strategies. |
-| `outputs/roulette_board.html` | Visualisation fichier du tapis roulette et des gains par numero. |
-| `outputs/report.html` | Index local reliant toutes les donnees et visualisations generees. |
 
-## Frontend
+## Commandes
 
-Le frontend sera une application React inspiree de `IvanAdmaers/react-casino-roulette`.
-
-Objectif :
-
-- reutiliser une logique de tapis roulette lisible ;
-- afficher les mises posees ;
-- superposer les zones couvertes et fortement exposees ;
-- colorer les numeros selon le gain net ;
-- afficher les hits explosifs ;
-- fournir des tooltips par numero ;
-- visualiser les courbes Monte Carlo avec filtrage par strategie.
-
-Lecture couleur cible :
-
-- rouge fonce : grosse perte ;
-- gris : perte legere ;
-- vert : profit ;
-- violet ou dore : hit explosif.
-
-## Commandes Cibles
-
-Backend :
+Installation backend :
 
 ```bash
 pip install -r requirements.txt
-python3 backend/src/run.py --profile robust_balanced --bankroll 50 --units 1,2,3,5,10
-python3 backend/src/run.py --profile recovery_hits --bankroll 100 --units 1,2,3,5,10
 ```
 
-Run rapide pour generer des fichiers consultables sans serveur web :
+Run rapide :
 
 ```bash
 python3 backend/src/run.py \
   --profile recovery_hits \
   --bankroll 100 \
-  --combos-to-generate 200 \
-  --keep-top-n 5 \
-  --monte-carlo-sessions 200 \
+  --combos-to-generate 1000 \
+  --keep-top-n 10 \
+  --monte-carlo-sessions 1000 \
   --spins-per-session 100 \
   --initial-bankroll 1000 \
-  --refinement-variants 2000 \
+  --refinement-variants 5000 \
+  --seed 42 \
   --output-dir outputs
 ```
 
-Ouvrir ensuite `outputs/report.html` ou directement `outputs/roulette_board.html`.
+Ouvrir les resultats :
 
-Frontend :
+```bash
+open outputs/report.html
+open outputs/roulette_board.html
+open outputs/monte_carlo_paths.html
+```
+
+Tests :
+
+```bash
+python3 -m unittest discover -s tests
+npm run build
+```
+
+Frontend React :
 
 ```bash
 cd frontend
@@ -336,7 +236,20 @@ npm install
 npm run dev
 ```
 
-## References Techniques
+## Limite Mathematique
+
+Ce projet ne promet pas de strategie gagnante long terme. En roulette europeenne, l'esperance reste negative. Le moteur cherche le meilleur compromis observable entre :
+
+- couverture ;
+- gros hits ;
+- pertes absorbables ;
+- probabilite de finir une session positive ;
+- drawdown acceptable ;
+- survie bankroll.
+
+Le `Grid Search` et le `Random Search` trouvent des structures interessantes. Le Monte Carlo montre comment ces structures se comportent quand l'ordre reel des spins devient aleatoire.
+
+## References
 
 | Repo | Role |
 | --- | --- |
@@ -345,14 +258,6 @@ npm run dev
 | `cjekel/Python-Roulette` | Probabilites, statistiques et validation mathematique. |
 | `plotly.py` | Graphiques Monte Carlo et exports HTML. |
 | `streamlit` | Dashboard rapide optionnel. |
-
-Ordre de travail conseille :
-
-1. Comprendre la logique simple avec `javascript-roulette`.
-2. Construire le backend Python.
-3. Integrer la logique probabiliste et les payouts.
-4. Generer les exports CSV, JSON et HTML Plotly.
-5. Brancher le frontend React et les overlays roulette.
 
 ## Documentation
 

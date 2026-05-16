@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="360" viewBox="0 0 1200 360" role="img" aria-labelledby="title desc">
+  <title id="title">Animated Monte Carlo result summary</title>
+  <desc id="desc">Animated chart summarizing the Monte Carlo validation of the selected roulette strategy.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#0b1017"/>
+      <stop offset="100%" stop-color="#161b22"/>
+    </linearGradient>
+    <linearGradient id="profit" x1="0" x2="1">
+      <stop offset="0%" stop-color="#2dd4bf"/>
+      <stop offset="100%" stop-color="#f2c94c"/>
+    </linearGradient>
+    <style>
+      .title { font: 800 28px Arial, sans-serif; fill: #f8fafc; }
+      .small { font: 600 13px Arial, sans-serif; fill: #a9b7c8; }
+      .axis { stroke: #425064; stroke-width: 1; }
+      .grid { stroke: #283241; stroke-width: 1; }
+      .label { font: 700 12px Arial, sans-serif; fill: #a9b7c8; }
+      .metricText { font: 800 20px Arial, sans-serif; fill: #f8fafc; }
+      .metricLabel { font: 600 12px Arial, sans-serif; fill: #a9b7c8; }
+    </style>
+  </defs>
+  <rect width="1200" height="360" rx="18" fill="url(#bg)"/>
+  <rect x="1" y="1" width="1198" height="358" rx="17" fill="none" stroke="#263244"/>
+  <text x="40" y="48" class="title">Validation Monte Carlo</text>
+  <text x="40" y="76" class="small">1000 sessions x 100 spins - strategie random_926_refined_4671</text>
+
+  <g transform="translate(70 105)">
+    <path d="M0 0H780M0 54H780M0 108H780M0 162H780M0 216H780" class="grid"/>
+    <path d="M0 0V216M156 0V216M312 0V216M468 0V216M624 0V216M780 0V216" class="grid"/>
+    <path d="M0 216H780M0 0V216" class="axis"/>
+    <text x="-6" y="220" text-anchor="end" class="label">0</text>
+    <text x="-6" y="166" text-anchor="end" class="label">500</text>
+    <text x="-6" y="112" text-anchor="end" class="label">1000</text>
+    <text x="-6" y="58" text-anchor="end" class="label">1500</text>
+    <text x="0" y="238" class="label">0</text>
+    <text x="370" y="238" class="label">50 spins</text>
+    <text x="732" y="238" class="label">100 spins</text>
+
+    <g fill="none" stroke-linecap="round" stroke-width="1.6" opacity="0.32">
+      <path d="M0 108C90 30 130 190 210 112S330 34 410 118 555 224 650 150 725 65 780 88" stroke="#60a5fa" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1">
+        <animate attributeName="stroke-dashoffset" values="1;0;0" dur="4.8s" repeatCount="indefinite"/>
+      </path>
+      <path d="M0 108C70 170 130 210 210 216S345 210 430 198 610 196 780 205" stroke="#93c5fd" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1">
+        <animate attributeName="stroke-dashoffset" values="1;0;0" dur="5.6s" begin="0.4s" repeatCount="indefinite"/>
+      </path>
+      <path d="M0 108C85 64 150 88 235 64S390 20 478 90 615 155 780 116" stroke="#60a5fa" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1">
+        <animate attributeName="stroke-dashoffset" values="1;0;0" dur="6.2s" begin="0.8s" repeatCount="indefinite"/>
+      </path>
+      <path d="M0 108C80 130 158 80 230 132S360 212 458 170 620 126 780 178" stroke="#93c5fd" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1">
+        <animate attributeName="stroke-dashoffset" values="1;0;0" dur="5.2s" begin="1.2s" repeatCount="indefinite"/>
+      </path>
+    </g>
+
+    <path d="M0 108C120 104 225 116 330 121S520 129 650 124 735 122 780 121" fill="none" stroke="#f2c94c" stroke-width="5" stroke-linecap="round" opacity="0.92" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1">
+      <animate attributeName="stroke-dashoffset" values="1;0;0" dur="4.5s" repeatCount="indefinite"/>
+    </path>
+    <path d="M0 108C120 125 230 154 344 178S548 208 676 212 736 211 780 210" fill="none" stroke="#ef4444" stroke-width="3" stroke-dasharray="8 7" stroke-linecap="round" opacity="0.75" pathLength="1" stroke-dashoffset="1">
+      <animate attributeName="stroke-dashoffset" values="1;0;0" dur="5.2s" repeatCount="indefinite"/>
+    </path>
+    <circle cx="780" cy="121" r="5" fill="#f2c94c">
+      <animate attributeName="r" values="4;8;4" dur="2.2s" repeatCount="indefinite"/>
+    </circle>
+    <text x="646" y="96" class="label">bankroll moyenne finale: 881.97</text>
+    <text x="612" y="200" class="label">mediane finale: 82</text>
+  </g>
+
+  <g transform="translate(910 105)">
+    <rect x="0" y="0" width="230" height="48" rx="9" fill="#172433" stroke="#263244"/>
+    <text x="16" y="20" class="metricLabel">probabilite de finir positif</text>
+    <text x="16" y="39" class="metricText">30.6%</text>
+    <rect x="0" y="60" width="230" height="48" rx="9" fill="#2a1720" stroke="#4a2430"/>
+    <text x="16" y="80" class="metricLabel">probabilite de bust</text>
+    <text x="16" y="99" class="metricText">63.8%</text>
+    <rect x="0" y="120" width="230" height="48" rx="9" fill="#222815" stroke="#4f4721"/>
+    <text x="16" y="140" class="metricLabel">plus gros hit observe</text>
+    <text x="16" y="159" class="metricText">+919</text>
+    <rect x="0" y="180" width="230" height="48" rx="9" fill="#151f28" stroke="#263244"/>
+    <text x="16" y="200" class="metricLabel">drawdown moyen max</text>
+    <text x="16" y="219" class="metricText">1361.87</text>
+  </g>
+
+  <rect x="70" y="330" width="190" height="8" rx="4" fill="#263244"/>
+  <rect x="70" y="330" width="58" height="8" rx="4" fill="url(#profit)">
+    <animate attributeName="width" values="0;58;58" dur="3s" repeatCount="indefinite"/>
+  </rect>
+  <text x="276" y="338" class="small">La simulation valide un profil de session, pas une esperance positive long terme.</text>
+</svg>
