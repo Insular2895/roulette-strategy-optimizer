@@ -100,6 +100,42 @@ class OptimizerTest(unittest.TestCase):
         self.assertIn("max_loss_cover", results[0]["metrics"])
         self.assertIn("loss_buffer_ratio", results[0]["score_components"])
 
+    def test_recovery_hits_profile_accepts_dense_hybrid_search(self):
+        config = {
+            "bankroll": {"total": 35, "allowed_units": [1, 2, 5], "exact_spend": True},
+            "objective": {"profile": "recovery_hits", "min_coverage": 0.0, "max_coverage": 1.0, "big_hit_threshold": 25},
+            "search": {"method": "dense_hybrid", "combos_to_generate": 15, "keep_top_n": 4},
+            "pareto": {"enabled": True, "candidate_pool_size": 6},
+            "stake_strategy": {"max_stake_per_bet": 5, "merge_same_bets": True},
+            "dense_coverage": {
+                "base_unit": 1,
+                "min_bet_count": 10,
+                "wheel_neighbor_radius": 2,
+                "announced_bundles_per_combo": 2,
+            },
+            "refinement": {"enabled": False},
+            "profiles": {
+                "recovery_hits": {
+                    "coverage_weight": 0.20,
+                    "profit_probability_weight": 0.18,
+                    "avg_win_weight": 0.22,
+                    "big_hit_weight": 0.18,
+                    "max_profit_weight": 0.18,
+                    "loss_buffer_weight": 0.30,
+                    "max_loss_cover_weight": 0.25,
+                    "risk_weight": 0.08,
+                    "volatility_weight": 0.04,
+                }
+            },
+        }
+
+        results = optimize(config, seed=12)
+
+        self.assertTrue(results)
+        self.assertEqual(results[0]["profile"], "recovery_hits")
+        self.assertIn("coverage_probability", results[0]["score_components"])
+        self.assertEqual([result["rank"] for result in results], [1, 2, 3, 4, 5, 6])
+
 
 if __name__ == "__main__":
     unittest.main()

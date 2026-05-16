@@ -98,11 +98,15 @@ Objectif du `Grid Search` : parcourir les structures previsibles et comparer leu
 
 Le `Random Search` complete ce travail en generant des combinaisons moins evidentes. Il permet de trouver des superpositions que le `Grid Search` strict peut manquer.
 
-Le mode hybride garde les meilleurs candidats, raffine les montants, puis relance un scoring plus exigeant.
+Le mode `dense_hybrid` peut ajouter une couche inspiree de la pose reelle en casino : beaucoup de petits jetons, des zones denses, des voisins de roue et des annonces francaises comme `voisins du zero`, `tiers du cylindre`, `orphelins` et `jeu zero`.
+
+Cette couche ne force pas le gagnant. Elle agrandit seulement l'espace de recherche. Le classement reste decide par l'evaluation theorique, le scoring du profil choisi et la validation Monte Carlo.
+
+Le mode hybride garde ensuite les meilleurs candidats, raffine les montants, puis relance un scoring plus exigeant.
 
 ## Pipeline Quantitatif
 
-1. Generation des combinaisons avec `Grid Search`, `Random Search` ou recherche hybride.
+1. Generation des combinaisons avec `Grid Search`, `Random Search`, `dense_hybrid` ou recherche hybride classique.
 2. Evaluation theorique sur tous les numeros de `0` a `36`.
 3. Calcul des metriques : couverture, profit, gros hits, variance, volatilite, drawdown, esperance.
 4. Scoring selon un profil : `safe`, `balanced`, `aggressive`, `robust_balanced` ou `recovery_hits`.
@@ -135,6 +139,12 @@ search:
   method: hybrid
   combos_to_generate: 50000
   keep_top_n: 10
+
+dense_coverage:
+  base_unit: 1
+  min_bet_count: 28
+  wheel_neighbor_radius: 2
+  announced_bundles_per_combo: 2
 
 refinement:
   enabled: true
@@ -212,6 +222,10 @@ python3 backend/src/run.py \
   --seed 42 \
   --output-dir outputs
 ```
+
+Pour ajouter les plans tres charges au pool de candidats sans les favoriser au scoring, passer temporairement `search.method` a `dense_hybrid` dans `config.yaml`. Le gagnant reste ensuite tranche par l'evaluation theorique et Monte Carlo.
+
+Pour une exploration sans filtre de couverture, passer aussi `objective.min_coverage` a `0.0` et `objective.max_coverage` a `1.0`.
 
 Ouvrir les resultats :
 

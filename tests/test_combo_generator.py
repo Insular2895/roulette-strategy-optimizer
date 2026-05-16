@@ -47,6 +47,30 @@ class ComboGeneratorTest(unittest.TestCase):
         self.assertTrue(any(combo_id.startswith("grid_") for combo_id in combo_ids))
         self.assertTrue(any(combo_id.startswith("random_") for combo_id in combo_ids))
 
+    def test_dense_generation_creates_casino_style_spread(self):
+        config = {
+            "bankroll": {"total": 40, "allowed_units": [1, 2, 5], "exact_spend": True},
+            "objective": {"min_coverage": 0.45, "max_coverage": 1.0},
+            "search": {"method": "dense", "combos_to_generate": 4},
+            "stake_strategy": {"max_stake_per_bet": 5, "merge_same_bets": True},
+            "dense_coverage": {
+                "base_unit": 1,
+                "min_bet_count": 12,
+                "wheel_neighbor_radius": 2,
+                "announced_bundles_per_combo": 2,
+            },
+        }
+
+        combos = generate_combos(config, seed=21)
+
+        self.assertEqual(len(combos), 4)
+        for combo in combos:
+            self.assertEqual(combo["total_staked"], 40)
+            self.assertGreaterEqual(len(combo["bets"]), 12)
+            metrics = evaluate_combo(combo)["metrics"]
+            self.assertGreaterEqual(metrics["coverage_probability"], 0.45)
+            self.assertLessEqual(metrics["coverage_probability"], 1.0)
+
 
 if __name__ == "__main__":
     unittest.main()

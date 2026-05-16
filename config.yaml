@@ -27,6 +27,12 @@ stake_strategy:
   allow_repeated_bets: true
   merge_same_bets: true
 
+dense_coverage:
+  base_unit: 1
+  min_bet_count: 28
+  wheel_neighbor_radius: 2
+  announced_bundles_per_combo: 2
+
 refinement:
   enabled: true
   top_n: 10

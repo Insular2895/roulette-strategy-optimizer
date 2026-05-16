@@ -1,6 +1,45 @@
 """European roulette board primitives."""
 
 EUROPEAN_NUMBERS = tuple(range(37))
+EUROPEAN_WHEEL_ORDER = (
+    0,
+    32,
+    15,
+    19,
+    4,
+    21,
+    2,
+    25,
+    17,
+    34,
+    6,
+    27,
+    13,
+    36,
+    11,
+    30,
+    8,
+    23,
+    10,
+    5,
+    24,
+    16,
+    33,
+    1,
+    20,
+    14,
+    31,
+    9,
+    22,
+    18,
+    29,
+    7,
+    28,
+    12,
+    35,
+    3,
+    26,
+)
 RED_NUMBERS = frozenset({1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36})
 BLACK_NUMBERS = frozenset(number for number in range(1, 37) if number not in RED_NUMBERS)
 
@@ -16,6 +55,17 @@ THIRD_COLUMN = frozenset(range(3, 37, 3))
 def get_numbers() -> tuple[int, ...]:
     """Return all European roulette outcomes, from 0 to 36."""
     return EUROPEAN_NUMBERS
+
+
+def get_wheel_neighbors(center: int, radius: int = 2) -> tuple[int, ...]:
+    """Return a number and its neighbors on the European wheel."""
+    validate_number(center)
+    if radius < 0:
+        raise ValueError("radius must be non-negative")
+
+    center_index = EUROPEAN_WHEEL_ORDER.index(center)
+    wheel_size = len(EUROPEAN_WHEEL_ORDER)
+    return tuple(EUROPEAN_WHEEL_ORDER[(center_index + offset) % wheel_size] for offset in range(-radius, radius + 1))
 
 
 def get_color(number: int) -> str:

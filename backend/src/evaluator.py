@@ -76,9 +76,27 @@ def calculate_metrics(outcomes: list[dict[str, Any]], total_staked: int) -> dict
     min_profit = min(net_profits) if net_profits else 0.0
     loss_buffer_ratio = avg_profit_if_win / avg_loss_if_loss if avg_loss_if_loss else 0.0
     max_loss_cover = max_profit / total_staked if total_staked else 0.0
+    winning_bet_ids = {
+        winning_bet["bet_id"]
+        for outcome in outcomes
+        for winning_bet in outcome["winning_bets"]
+    }
+    bet_count = len(winning_bet_ids)
+    max_stake = max(
+        (
+            float(winning_bet["stake"])
+            for outcome in outcomes
+            for winning_bet in outcome["winning_bets"]
+        ),
+        default=0.0,
+    )
+    max_stake_share = max_stake / total_staked if total_staked else 0.0
 
     return {
         "total_staked": total_staked,
+        "bet_count": bet_count,
+        "avg_stake_per_bet": total_staked / bet_count if bet_count else 0.0,
+        "max_stake_share": max_stake_share,
         "coverage_probability": len(covered) / len(outcomes),
         "hit_probability": len(covered) / len(outcomes),
         "profit_probability": len(profitable) / len(outcomes),
