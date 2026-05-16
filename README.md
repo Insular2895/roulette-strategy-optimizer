@@ -1,7 +1,7 @@
 # Roulette Strategy Optimizer
 
 <p align="center">
-  <img alt="Roulette Strategy Optimizer banner" src="docs/assets/readme-banner-v2.svg" width="100%">
+  <img alt="Roulette Strategy Optimizer animated banner" src="docs/assets/readme-banner-v3.svg" width="100%">
 </p>
 
 <p align="center">
